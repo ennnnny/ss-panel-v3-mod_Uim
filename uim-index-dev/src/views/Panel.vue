@@ -1,6 +1,6 @@
 <template>
   <div class="page-user pure-u-1">
-    <div class="title-back flex align-center">USERCENTER</div>
+    <div v-if="globalConfig.enable_bing === false" class="title-back flex align-center">USERCENTER</div>
     <transition name="loading-fadex" mode="out-in">
       <div class="loading flex align-center" v-if="userLoadState === 'beforeload'">USERCENTER</div>
 
@@ -205,7 +205,7 @@
               <a v-if="userCon.is_admin === true" class="btn-user" href="/admin">运营中心</a>
             </div>
             <div class="pure-u-1-2 text-right btngroup-right">
-              <a href="/user" class="btn-user">管理面板</a>
+              <a v-if="showOldSite" href="/user" class="btn-user">管理面板</a>
               <button @click="logout" class="btn-user">账号登出</button>
             </div>
           </div>
@@ -351,7 +351,8 @@ export default {
           id: "user-shop"
         }
       ],
-      currentCardComponent: "user-announcement"
+      currentCardComponent: "user-announcement",
+      showOldSite: 1
     };
   },
   watch: {
@@ -458,6 +459,12 @@ export default {
   mounted() {
     let self = this;
     this.userLoadState = "loading";
+
+    if (this.globalConfig.isShowOldSite) {
+      this.showOldSite = 1;
+    }else{
+      this.showOldSite = 0;
+    }
 
     _get("/getuserinfo", "include")
       .then(r => {

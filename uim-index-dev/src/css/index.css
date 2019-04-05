@@ -10,6 +10,30 @@ body {
     min-height: 100vh;
 }
 
+.bg {
+    position: fixed;
+    z-index: -2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: url("https://bing.ioliu.cn/v1?w=1920&h=1080")
+    no-repeat center center;
+    background-size: cover;
+    /*filter: blur(10px);*/
+}
+
+.mask {
+    z-index: -1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 0.6;
+}
+
 a {
     color: inherit;
     text-decoration: none;
@@ -137,7 +161,7 @@ a {
 .sign {
     font-size: .5rem;
     margin-top: 2px;
-    color: #858585;
+    color: #b4b4b4;
 }
 
 .main {
@@ -176,6 +200,7 @@ a {
     font-size: 1.5rem;
     display: block;
     margin-bottom: 2rem;
+    margin-top: 2rem;
 }
 
 .button-index {
@@ -198,7 +223,7 @@ button.btn-user {
     font-size: 1rem;
     padding: .5rem .5rem;
     display: inline-block;
-    border: 1px solid #434857;
+    border: 1px solid #858585;
     min-width: 80px;
     text-align: center;
     transition: all .3s;
@@ -498,7 +523,7 @@ select {
 }
 
 .card {
-    border: 1px solid #434857;
+    border: 1px solid #858585;
     margin-bottom: 1.5rem;
 }
 

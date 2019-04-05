@@ -1,6 +1,6 @@
 <template>
   <div class="page-pw pure-u-1 pure-g flex align-center space-around wrap">
-    <div class="title-back flex align-center">PASSWORD</div>
+    <div v-if="globalConfig.enable_bing === false" class="title-back flex align-center">PASSWORD</div>
     <div class="pure-u-1 pure-u-sm-10-24 flex space-around wrap basis-max">
       <h1>密码重置</h1>
       <div class="input-control flex wrap">

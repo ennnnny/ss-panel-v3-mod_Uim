@@ -1,6 +1,6 @@
 <template>
   <div class="page-auth pure-g pure-u-1 pure-u-sm-20-24 wrap">
-    <div class="title-back flex align-center">LOGIN</div>
+    <div v-if="globalConfig.enable_bing === false" class="title-back flex align-center">LOGIN</div>
     <h1>登录</h1>
     <div class="pure-u-1 basis-max" :class="[ isTgEnabled ? 'pure-u-sm-11-24' : 'pure-u-sm-1-2' ]">
       <div class="input-control flex wrap">

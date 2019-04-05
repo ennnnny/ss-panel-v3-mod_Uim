@@ -1,6 +1,6 @@
 <template>
   <div class="page-auth pure-g pure-u-1 pure-u-sm-20-24">
-    <div class="title-back flex align-center">REGISTER</div>
+    <div v-if="globalConfig.enable_bing === false" class="title-back flex align-center">REGISTER</div>
     <h1>账号注册</h1>
     <div class="flex space-around reg">
       <div class="input-control flex wrap">

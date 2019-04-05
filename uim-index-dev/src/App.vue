@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <div v-if="globalConfig.enable_bing" class="bg"></div>
     <transition name="loading-fade" mode="out-in">
       <div class="loading flex align-center" v-if="isLoading === 'loading'" key="loading">
         <div class="spinner"></div>
@@ -8,7 +9,7 @@
       <div v-cloak v-else-if="isLoading === 'loaded'" class="flex wrap" key="loaded">
         <div class="nav pure-g">
           <div class="pure-u-1-2 logo-sm flex align-center">
-            <a href="/indexold" class="flex align-center">
+            <a :href="siteUrl" class="flex align-center">
               <img class="logo" src="/images/logo_white.png" alt="logo">
               <div class="info">
                 <div class="name">{{globalConfig.indexMsg.appname}}</div>
@@ -55,6 +56,7 @@
         </transition>
       </div>
     </transition>
+    <div v-if="globalConfig.enable_bing" class="mask"></div>
   </div>
 </template>
 
@@ -109,7 +111,8 @@ export default {
   data: function() {
     return {
       routerN: "auth",
-      transType: "slide-fade"
+      transType: "slide-fade",
+      siteUrl: ""
     };
   },
   methods: {
@@ -159,6 +162,11 @@ export default {
     setTimeout(() => {
       this.setLoadState();
     }, 1000);
+    if (this.globalConfig.isShowOldSite) {
+      this.siteUrl = "/indexold";
+    }else{
+      this.siteUrl = "/";
+    }
   }
 };
 </script>

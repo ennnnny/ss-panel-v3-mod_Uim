@@ -1,6 +1,6 @@
 <template>
   <div class="page-user pure-u-1">
-    <div class="title-back flex align-center">NODELIST</div>
+    <div v-if="globalConfig.enable_bing === false" class="title-back flex align-center">NODELIST</div>
 
     <transition name="loading-fadex" mode="out-in">
       <div class="loading flex align-center" v-if="userLoadState === 'beforeload'">NODELIST</div>

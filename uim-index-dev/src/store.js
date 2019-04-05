@@ -84,8 +84,10 @@ export default new Vuex.Store({
       state.globalConfig.login_token = config.login_token
       state.globalConfig.login_number = config.login_number
       state.globalConfig.telegram_bot = config.telegram_bot
+      state.globalConfig.isShowOldSite = config.show_old_site
       state.globalConfig.crisp = config.enable_mylivechat
       state.globalConfig.enable_telegram = config.enable_telegram
+      state.globalConfig.enable_bing = config.enable_bing
       state.globalConfig.indexMsg.appname = config.appName
       state.globalConfig.indexMsg.date = config.dateY
     },

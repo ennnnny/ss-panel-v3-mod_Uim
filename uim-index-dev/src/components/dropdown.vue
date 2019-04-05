@@ -49,7 +49,7 @@ export default {
   font-size: 1rem;
   padding: 0.5rem 0.5rem;
   display: inline-block;
-  border: 1px solid #434857;
+  border: 1px solid #858585;
   min-width: 80px;
   text-align: center;
   transition: all 0.3s;
@@ -72,7 +72,7 @@ export default {
   top: 100%;
   min-width: 120px;
   cursor: pointer;
-  background: #1d1d1d;
+  background: rgba(0, 0, 0, 0.7);
   z-index: 2;
 }
 

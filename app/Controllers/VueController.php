@@ -66,6 +66,12 @@ class VueController extends BaseController {
             $login_number = '';
         }
 
+        if (Config::get('show_old_site') == 'false' && !$user->is_admin){
+            $show_old_site = false;
+        }else{
+            $show_old_site = true;
+        }
+
         $res['globalConfig'] = array(
             "geetest_html" => $GtSdk,
             "login_token" => $login_token,
@@ -85,6 +91,8 @@ class VueController extends BaseController {
             "isLogin" => $user->isLogin,
             "enable_telegram" => Config::get('enable_telegram'),
             "enable_mylivechat" => Config::get('enable_mylivechat'),
+            "show_old_site" => $show_old_site,
+            "enable_bing" => Config::get('enable_bing') == 'true' ? true : false,
         );
 
         $res['ret'] = 1;

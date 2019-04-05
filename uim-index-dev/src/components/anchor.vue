@@ -29,7 +29,7 @@ export default {
   height: 1.75rem;
   display: block;
   background-color: transparent;
-  border: 2px solid #434857;
+  border: 1px solid #858585;
   border-top-color: transparent;
   transition: all 0.3s;
   cursor: pointer;
