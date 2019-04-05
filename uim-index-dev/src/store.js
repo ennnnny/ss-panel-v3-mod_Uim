@@ -42,7 +42,8 @@ export default new Vuex.Store({
         hitokoto: '',
         date: '',
         jinrishici: ''
-      }
+      },
+      paymentType: ''
     }
   },
   mutations: {
@@ -90,6 +91,7 @@ export default new Vuex.Store({
       state.globalConfig.enable_bing = config.enable_bing
       state.globalConfig.indexMsg.appname = config.appName
       state.globalConfig.indexMsg.date = config.dateY
+      state.globalConfig.paymentType = config.payment_type
     },
     SET_HITOKOTO (state, content) {
       state.globalConfig.indexMsg.hitokoto = content
