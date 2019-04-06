@@ -36,6 +36,7 @@ import Code from "@/components/payment/code.vue";
 import Log from "@/components/payment/log.vue";
 import Trime from "@/components/payment/trimepay.vue";
 import CodePay from "@/components/payment/codepay.vue";
+import F2f from "@/components/payment/f2fpay.vue";
 
 export default {
   mixins: [userMixin, storeMap],
@@ -44,13 +45,16 @@ export default {
     "payment-code": Code,
     "payment-log": Log,
     "payment-trimepay": Trime,
-    "payment-codepay": CodePay
+    "payment-codepay": CodePay,
+    "payment-f2fpay": F2f,
   },
   computed: {
     paymentType: function() {
       switch (this.currentPayment) {
         case "trimepay":
           return this.menuList["trimepay"];
+        case "f2fpay":
+          return this.menuList["f2fpay"];
         case "codepay":
           return this.menuList["codepay"];
         case "code":
@@ -82,20 +86,27 @@ export default {
   },
   created() {
     let type = this.globalConfig.paymentType;
-    this.currentPayment = type;
-    let curPayment = {
-      name: "自助充值",
-      component: ""
-    };
-    switch (type) {
-      case "trimepay":
-        curPayment.component = "payment-trimepay";
-        break;
-      case "codepay":
-        curPayment.component = "payment-codepay";
-        break;
+    if (type != 'none') {
+      this.currentPayment = type;
+      let curPayment = {
+        name: "自助充值",
+        component: ""
+      };
+      switch (type) {
+        case "trimepay":
+          curPayment.component = "payment-trimepay";
+          break;
+        case "codepay":
+          curPayment.component = "payment-codepay";
+          break;
+        case "f2fpay":
+          curPayment.component = "payment-f2fpay";
+          break;
+      }
+      this.$set(this.menuList, this.globalConfig.paymentType, curPayment);
+    }else{
+      this.currentPayment = 'code'
     }
-    this.$set(this.menuList, this.globalConfig.paymentType, curPayment);
     window.console.log(this.menuList);
   }
 };

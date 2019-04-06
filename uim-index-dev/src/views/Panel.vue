@@ -462,7 +462,7 @@ export default {
 
     if (this.globalConfig.isShowOldSite) {
       this.showOldSite = 1;
-    }else{
+    } else {
       this.showOldSite = 0;
     }
 

@@ -164,7 +164,7 @@ export default {
     }, 1000);
     if (this.globalConfig.isShowOldSite) {
       this.siteUrl = "/indexold";
-    }else{
+    } else {
       this.siteUrl = "/";
     }
   }

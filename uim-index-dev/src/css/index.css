@@ -604,6 +604,11 @@ select {
     border-color: #1997c6;
 }
 
+.tips-indianred {
+    color: #cd5c5c;
+    border-color: #cd5c5c;
+}
+
 .tips-gold {
     color: #faad14;
     border-color: #faad14;
@@ -646,6 +651,7 @@ button.tips {
 }
 
 .tips-blue:hover,
+.tips-indianred:hover,
 .tips-gold:hover,
 .tips-green:hover,
 .tips-cyan:hover,
@@ -655,6 +661,10 @@ button.tips {
 
 .tips-blue:hover {
     background-color: #1997c6;
+}
+
+.tips-indianred:hover {
+    background-color: #DC5B5B;
 }
 
 .tips-gold:hover {

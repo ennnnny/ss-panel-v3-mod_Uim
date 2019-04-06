@@ -51,7 +51,7 @@
     {if isset($geetest_html)}
     <script src="//static.geetest.com/static/tools/gt.js"></script>
     {/if}
-    {if $config['enable_telegram'] == 'true'}
+    {if $config['enable_telegram'] == 'true' || $config['payment_system'] == 'f2fpay'}
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
     {/if}
   </body>
