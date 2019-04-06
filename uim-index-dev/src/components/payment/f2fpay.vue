@@ -13,10 +13,11 @@
       <div v-if="isQrShow" class="text-center pure-g flex align-center">
         <div class="pure-u-1 pure-u-sm-1-2">
           <p>使用支付宝扫描二维码支付</p>
+          <p>移动端可以点击二维码</p>
           <p>充值完毕后会自动跳转</p>
         </div>
         <div class="pure-u-1 pure-u-sm-1-2">
-          <div align="center" id="trimeweqr" style="padding-top:10px;"></div>
+          <div align="center" id="trimeweqr" style="padding-top:10px;" @click="jumpPay"></div>
         </div>
       </div>
     </transition>
@@ -50,6 +51,7 @@ export default {
       isCardShow: false,
       isQrShow: false,
       tid: "",
+      payUrl: "",
       qrcode: {}
     };
   },
@@ -105,6 +107,7 @@ export default {
                 height: 200,
                 text: r.qrcode
               });
+              this.payUrl = r.qrcode;
               this.tid = setTimeout(() => {
                 this.chargeChecker(r.pid);
               }, 1000);
@@ -153,6 +156,25 @@ export default {
           }, 1000);
         }
       });
+    },
+    isPC() {
+      let userAgentInfo = window.navigator.userAgent;
+      let Agents = new Array("Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod");
+      let flag = true;
+      for (let v = 0; v < Agents.length; v++) {
+        if (userAgentInfo.indexOf(Agents[v]) > 0) {
+          flag = false;
+          break;
+        }
+      }
+      return flag;
+    },
+    jumpPay() {
+      if (this.isPC()){
+        window.console.log(this.payUrl);
+      }else{
+        window.location.href = this.payUrl;
+      }
     }
   }
 };
