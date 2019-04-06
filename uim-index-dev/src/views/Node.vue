@@ -3,7 +3,7 @@
     <div v-if="globalConfig.enable_bing === false" class="title-back flex align-center">NODELIST</div>
 
     <transition name="loading-fadex" mode="out-in">
-      <div class="loading flex align-center" v-if="userLoadState === 'beforeload'">NODELIST</div>
+      <div class="loading flex align-center" style="position: static;" v-if="userLoadState === 'beforeload'">NODELIST</div>
 
       <div class="loading flex align-center" v-else-if="userLoadState === 'loading'" key="loading">
         <div class="spinnercube">
@@ -134,17 +134,25 @@ export default {
     _get("/getnodelist", "include")
       .then(r => {
         window.console.log(r);
+        if (r.nodeinfo.nodes.length > 0) {
+          this.nodeList = r.nodeinfo.nodes;
+          this.user = r.nodeinfo.user;
 
-        this.nodeList = r.nodeinfo.nodes;
-        this.user = r.nodeinfo.user;
-
-        this.currentNodeClass = this.nodeList[0].class;
-        this.setCurrentNode(0);
+          this.currentNodeClass = this.nodeList[0].class;
+          this.setCurrentNode(0);
+        }
+        return r;
       })
       .then(r => {
-        setTimeout(() => {
-          self.userLoadState = "loaded";
-        }, 1000);
+        if (r.nodeinfo.nodes.length > 0) {
+          setTimeout(() => {
+            self.userLoadState = "loaded";
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            self.userLoadState = "beforeload";
+          }, 1000);
+        }
       });
   },
   beforeRouteLeave(to, from, next) {
