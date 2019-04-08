@@ -161,49 +161,73 @@
           </div>
         </div>
         <div class="pure-u-1 pure-u-xl-17-24">
+<!--          <div class="card relative">-->
+<!--            <uim-anchor>-->
+<!--              <template #uim-anchor-inner>-->
+<!--                <li-->
+<!--                  v-for="(page,index) in userSettings.pages"-->
+<!--                  @click="changeUserSetPage(index)"-->
+<!--                  :class="{ 'uim-anchor-active':userSettings.currentPage === page.id }"-->
+<!--                  :data-page="page.id"-->
+<!--                  :key="page.id"-->
+<!--                ></li>-->
+<!--              </template>-->
+<!--            </uim-anchor>-->
+<!--            <transition name="fade" mode="out-in">-->
+<!--              <keep-alive>-->
+<!--                <component-->
+<!--                  v-on:turnPageByWheel="scrollPage"-->
+<!--                  :resourseTrans="userResourseTrans"-->
+<!--                  :is="userSettings.currentPage"-->
+<!--                  :initialSet="userSettings"-->
+<!--                  class="settiings-toolbar card margin-nobottom"-->
+<!--                ></component>-->
+<!--              </keep-alive>-->
+<!--            </transition>-->
+<!--          </div>-->
           <div class="card relative">
-            <uim-anchor>
-              <template #uim-anchor-inner>
-                <li
-                  v-for="(page,index) in userSettings.pages"
-                  @click="changeUserSetPage(index)"
-                  :class="{ 'uim-anchor-active':userSettings.currentPage === page.id }"
-                  :data-page="page.id"
-                  :key="page.id"
-                ></li>
-              </template>
-            </uim-anchor>
-            <transition name="fade" mode="out-in">
-              <keep-alive>
-                <component
-                  v-on:turnPageByWheel="scrollPage"
-                  :resourseTrans="userResourseTrans"
-                  :is="userSettings.currentPage"
-                  :initialSet="userSettings"
-                  class="settiings-toolbar card margin-nobottom"
-                ></component>
-              </keep-alive>
-            </transition>
+            <keep-alive>
+              <component
+                :resourseTrans="userResourseTrans"
+                :is="userSettings.pages[0].id"
+                :initialSet="userSettings"
+                class="settiings-toolbar card margin-nobottom"
+              ></component>
+            </keep-alive>
+            <keep-alive>
+              <component
+                :resourseTrans="userResourseTrans"
+                :is="userSettings.pages[1].id"
+                :initialSet="userSettings"
+                class="settiings-toolbar card margin-nobottom"
+              ></component>
+            </keep-alive>
           </div>
           <div class="user-btngroup pure-g">
-            <div class="pure-u-1-2 btngroup-left">
-              <uim-dropdown>
-                <template #dpbtn-content>
-                  <transition name="fade" mode="out-in">
-                    <div :key="currentCardComponent">{{menuOptions[currentCardComponentIndex].name}}</div>
-                  </transition>
-                </template>
-                <template #dp-menu>
-                  <li
-                    @click="componentChange"
-                    v-for="menu in menuOptions"
-                    :data-component="menu.id"
-                    :key="menu.id"
-                  >{{menu.name}}</li>
-                </template>
-              </uim-dropdown>
-              <a v-if="userCon.is_admin === true" class="btn-user" href="/admin">运营中心</a>
+            <div class="pure-u-1-2">
+              <a @click="componentChange"
+                 v-for="menu in menuOptions"
+                 :data-component="menu.id"
+                 :key="menu.id" class="btn-user">{{menu.name}}</a>
             </div>
+<!--            <div class="pure-u-1-2 btngroup-left">-->
+<!--              <uim-dropdown>-->
+<!--                <template #dpbtn-content>-->
+<!--                  <transition name="fade" mode="out-in">-->
+<!--                    <div :key="currentCardComponent">{{menuOptions[currentCardComponentIndex].name}}</div>-->
+<!--                  </transition>-->
+<!--                </template>-->
+<!--                <template #dp-menu>-->
+<!--                  <li-->
+<!--                    @click="componentChange"-->
+<!--                    v-for="menu in menuOptions"-->
+<!--                    :data-component="menu.id"-->
+<!--                    :key="menu.id"-->
+<!--                  >{{menu.name}}</li>-->
+<!--                </template>-->
+<!--              </uim-dropdown>-->
+<!--              <a v-if="userCon.is_admin === true" class="btn-user" href="/admin">运营中心</a>-->
+<!--            </div>-->
             <div class="pure-u-1-2 text-right btngroup-right">
               <a v-if="showOldSite" href="/user" class="btn-user">管理面板</a>
               <button @click="logout" class="btn-user">账号登出</button>
