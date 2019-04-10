@@ -25,6 +25,7 @@ use App\Models\RadiusBan;
 use App\Models\DetectLog;
 use App\Models\DetectRule;
 
+use Carbon\Carbon;
 use voku\helper\AntiXSS;
 
 use App\Models\User;
@@ -1109,6 +1110,17 @@ class UserController extends BaseController
 
         if (!$user->isLogin) {
             $res['ret'] = -1;
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        //判断是否有相同产品订单
+        $start_time = Carbon::now()->startOfMonth()->timestamp;
+        $end_time = Carbon::now()->endOfMonth()->timestamp;
+        $buyed_num = Bought::where('shopid',$shop->id)->where('userid',$user->id)->where('datetime','>=',$start_time)
+            ->where('datetime','<=',$end_time)->count();
+        if ($buyed_num > 0){
+            $res['ret'] = 0;
+            $res['msg'] = '当前月份已经购买过此套餐，请勿重复购买！';
             return $response->getBody()->write(json_encode($res));
         }
 
