@@ -144,6 +144,9 @@ export default {
         return r;
       })
       .then(r => {
+        setTimeout(() => {
+          self.userLoadState = "loaded";
+        }, 500);
         if (r.nodeinfo.nodes.length > 0) {
           setTimeout(() => {
             self.userLoadState = "loaded";
