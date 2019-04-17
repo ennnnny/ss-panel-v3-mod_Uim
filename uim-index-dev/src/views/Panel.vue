@@ -209,6 +209,7 @@
                  v-for="menu in menuOptions"
                  :data-component="menu.id"
                  :key="menu.id" class="btn-user">{{menu.name}}</a>
+              <a v-if="userCon.is_admin === true" class="btn-user" href="/admin">运营中心</a>
             </div>
 <!--            <div class="pure-u-1-2 btngroup-left">-->
 <!--              <uim-dropdown show-arrow>-->
