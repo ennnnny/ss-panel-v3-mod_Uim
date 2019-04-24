@@ -118,7 +118,7 @@ class AuthController extends BaseController
         }
 
         // Handle Login
-        $user = User::where('email', '=', $email)->first();
+        $user = User::where('email', '=', $email)->where('p_id',0)->first();
 
         if ($user == null) {
             $rs['ret'] = 0;

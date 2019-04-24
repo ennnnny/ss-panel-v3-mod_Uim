@@ -813,7 +813,9 @@ class UserController extends BaseController
 
         $config_service = new Config();
 
-        return $this->view()->assign('user', $this->user)->assign('themes', $themes)->assign('isBlock', $isBlock)->assign('Block', $Block)->assign('bind_token', $bind_token)->assign('telegram_bot', Config::get('telegram_bot'))->assign('config_service', $config_service)
+        return $this->view()->assign('user', $this->user)->assign('themes', $themes)->assign('isBlock', $isBlock)
+            ->assign('Block', $Block)->assign('bind_token', $bind_token)->assign('telegram_bot', Config::get('telegram_bot'))
+            ->assign('config_service', $config_service)
             ->registerClass("URL", "App\Utils\URL")->display('user/edit.tpl');
     }
 
@@ -1812,5 +1814,116 @@ class UserController extends BaseController
         ], $expire_in);
         $newResponse = $response->withStatus(302)->withHeader('Location', $local);
         return $newResponse;
+    }
+
+    public function updateAccountType($request,$response)
+    {
+        $account_type = $request->getParam('account_type') ?? 1;
+        $type_value = $request->getParam('type_value') ?? 0;
+
+        $user = $this->user;
+
+        try{
+            //当前购买了套餐，禁止修改账号类型
+            $start_time = Carbon::now()->startOfMonth()->timestamp;
+            $end_time = Carbon::now()->endOfMonth()->timestamp;
+            $buyed_num = Bought::where('userid',$user->id)->where('datetime','>=',$start_time)
+                ->where('datetime','<=',$end_time)->count();
+            if ($buyed_num > 0){
+                $res['ret'] = 0;
+                $res['msg'] = "当前购买了套餐，禁止修改账号类型";
+                return $this->echoJson($response, $res);
+            }
+
+            if ($account_type == 2 && $type_value > 0) {
+                //恢复旧子账号，并重置流量及等级
+                $num = User::query()->where('p_id',$user->id)->get()->count();
+                if ($num > $type_value){
+                    $restore = $type_value;
+                    $sheng = 0;
+                }else{
+                    $restore = $num;
+                    $sheng = $type_value - $num;
+                }
+                User::query()->where('p_id',$user->id)->limit($restore)->update([
+                    'enable' => 1,
+                    'transfer_enable' => Tools::toGB(Config::get('defaultTraffic')),
+                    'class' => Config::get('user_class_default'),
+                    'class_expire' => date("Y-m-d H:i:s", time() + Config::get('user_class_expire_default') * 3600)
+                ]);
+                if ($sheng > 0) {
+                    //新增子账号
+                    $d_name = $user->user_name;
+                    $d_email = explode('@', $user->email);
+                    $d_im_type = $user->im_type;
+                    $d_im_value = $user->im_value;
+                    for ($i = 1; $i <= $type_value; $i++) {
+                        $sub_user = new User();
+                        $sub_user->user_name = $d_name . str_random(5);
+
+                        $email_temp = [];
+                        $email_temp[] = $d_email[0] . str_random(5);
+                        $email_temp[] = $d_email[1];
+                        $sub_user->email = implode('@', $email_temp);
+
+                        $sub_user->pass = Hash::passwordHash(str_random(8));
+                        $sub_user->passwd = Tools::genRandomChar(6);
+                        $sub_user->port = Tools::getAvPort();
+                        $sub_user->t = 0;
+                        $sub_user->u = 0;
+                        $sub_user->d = 0;
+                        $sub_user->method = Config::get('reg_method');
+                        $sub_user->protocol = Config::get('reg_protocol');
+                        $sub_user->protocol_param = Config::get('reg_protocol_param');
+                        $sub_user->obfs = Config::get('reg_obfs');
+                        $sub_user->obfs_param = Config::get('reg_obfs_param');
+                        $sub_user->forbidden_ip = Config::get('reg_forbidden_ip');
+                        $sub_user->forbidden_port = Config::get('reg_forbidden_port');
+                        $sub_user->im_type = $d_im_type;
+                        $sub_user->im_value = $d_im_value;
+                        $sub_user->transfer_enable = Tools::toGB(Config::get('defaultTraffic'));
+                        $sub_user->invite_num = Config::get('inviteNum');
+                        $sub_user->auto_reset_day = Config::get('reg_auto_reset_day');
+                        $sub_user->auto_reset_bandwidth = Config::get('reg_auto_reset_bandwidth');
+                        $sub_user->money = 0;
+                        $sub_user->ref_by = 0;
+                        $sub_user->class_expire = date("Y-m-d H:i:s", time() + Config::get('user_class_expire_default') * 3600);
+                        $sub_user->class = Config::get('user_class_default');
+                        $sub_user->node_connector = Config::get('user_conn');
+                        $sub_user->node_speedlimit = Config::get('user_speedlimit');
+                        $sub_user->expire_in = date("Y-m-d H:i:s", time() + Config::get('user_expire_in_default') * 86400);
+                        $sub_user->reg_date = date("Y-m-d H:i:s");
+                        $sub_user->reg_ip = $_SERVER["REMOTE_ADDR"];
+                        $sub_user->plan = 'A';
+                        $sub_user->theme = Config::get('theme');
+
+                        $groups = explode(",", Config::get('ramdom_group'));
+                        $sub_user->node_group = $groups[array_rand($groups)];
+
+                        $ga = new GA();
+                        $secret = $ga->createSecret();
+                        $sub_user->ga_token = $secret;
+                        $sub_user->ga_enable = 0;
+
+                        $sub_user->p_id = $user->id;
+                        $sub_user->save();
+                    }
+                }
+            }else{
+                //禁用子账号
+                User::query()->where('p_id',$user->id)->update(['enable'=>0]);
+            }
+            //更新账户
+            $user->account_type = $account_type;
+            $user->type_value = $type_value;
+            $user->save();
+            $res['ret'] = 1;
+            $res['msg'] = "修改成功";
+        }catch (\Exception $exception){
+            $res['ret'] = 0;
+            $res['msg'] = "修改失败";
+        }
+
+        return $this->echoJson($response, $res);
     }
 }

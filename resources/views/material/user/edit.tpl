@@ -410,9 +410,46 @@
 							</div>
 						</div>
 						{/if}
-					
 
 
+						<div class="card margin-bottom-no">
+							<div class="card-main">
+								<div class="card-inner">
+									<div class="card-inner">
+										<div class="cardbtn-edit">
+											<div class="card-heading">账号类型修改</div>
+											<button class="btn btn-flat" id="account-type-update"><span class="icon">check</span>&nbsp;</button>
+										</div>
+										<p>当前账号类型：
+											<code>
+												{if $user->account_type==1}
+													个人
+												{/if}
+												{if $user->account_type==2}
+													团队
+												{/if}
+											</code>
+										</p>
+										<p {if $user->account_type==1}style="display: none"{/if} id="type_value_1">当前团队人员数量：
+											<code>{$user->type_value}</code>
+										</p>
+										<div class="form-group form-group-label control-highlight-custom dropdown">
+											<label class="floating-label" for="account_type">选择您的账号类型</label>
+											<button class="form-control maxwidth-edit" id="account_type" data-toggle="dropdown" value="{$user->account_type}"></button>
+											<ul class="dropdown-menu" aria-labelledby="account_type">
+												<li><a href="#" class="dropdown-option" onclick="change_account_type(1);return false;" val="1" data="account_type">个人</a></li>
+												<li><a href="#" class="dropdown-option" onclick="change_account_type(2);return false;" val="2" data="account_type">团队</a></li>
+											</ul>
+										</div>
+
+										<div class="form-group form-group-label" {if $user->account_type==1}style="display: none"{/if} id="type_value_2">
+											<label class="floating-label" for="wechat">在这输入团队人员数量</label>
+											<input class="form-control maxwidth-edit" id="type_value" type="text" value="{$user->type_value}">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 
 
 					{include file='dialog.tpl'}
@@ -438,7 +475,16 @@ $(".copy-text").click(function () {
 	$("#result").modal();
 	$("#msg").html("已复制到您的剪贴板。");
 });
-
+function change_account_type(id) {
+	// console.log(id);
+	if (id == 2){
+		$('#type_value_1').show();
+		$('#type_value_2').show();
+	}else{
+		$('#type_value_1').hide();
+		$('#type_value_2').hide();
+	}
+}
 
 </script>
 
@@ -605,6 +651,32 @@ $(".copy-text").click(function () {
                 }
             })
         })
+		$("#account-type-update").click(function () {
+			$.ajax({
+				type: "POST",
+				url: "account_type",
+				dataType: "json",
+				data: {
+					account_type: $("#account_type").val(),
+					type_value: $("#type_value").val()
+				},
+				success: function (data) {
+					if (data.ret) {
+						$("#result").modal();
+						$("#msg").html(data.msg);
+						window.setTimeout("location.href=window.location.href", {$config['jump_delay']});
+					} else {
+						$("#result").modal();
+						$("#msg").html(data.msg);
+						window.setTimeout("location.href=window.location.href", {$config['jump_delay']});
+					}
+				},
+				error: function (jqXHR) {
+					$("#result").modal();
+					$("#msg").html(data.msg+"     出现了一些错误。");
+				}
+			})
+		})
     })
 </script>
 
