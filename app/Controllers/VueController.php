@@ -149,7 +149,7 @@ class VueController extends BaseController
         $user['online_ip_count'] = $user->online_ip_count();
         if ($user->account_type == 2) {
             //团体账户处理
-            $sub_users = User::query()->where('p_id',$user->id)->get();
+            $sub_users = User::query()->where('p_id',$user->id)->where('enable',1)->get();
             $port = $passwd = $method = $protocol = $obfs = $obfs_param = [];
             foreach ($sub_users as $sub_user) {
                 $port[] = $sub_user->port;
