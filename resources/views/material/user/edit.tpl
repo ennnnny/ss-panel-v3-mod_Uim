@@ -443,7 +443,7 @@
 										</div>
 
 										<div class="form-group form-group-label" {if $user->account_type==1}style="display: none"{/if} id="type_value_2">
-											<label class="floating-label" for="wechat">在这输入团队人员数量</label>
+											<label class="floating-label" for="type_value">在这输入团队人员数量</label>
 											<input class="form-control maxwidth-edit" id="type_value" type="text" value="{$user->type_value}">
 										</div>
 									</div>

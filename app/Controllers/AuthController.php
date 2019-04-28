@@ -332,9 +332,10 @@ class AuthController extends BaseController
         $emailcode = trim($emailcode);
         $wechat = $request->getParam('wechat');
         $wechat = trim($wechat);
+        $account_type = $request->getParam('account_type');
+        $type_value = (int)($request->getParam('type_value'));
+
         // check code
-
-
         if (Config::get('enable_reg_captcha') == 'true') {
             switch (Config::get('captcha_provider')) {
                 case 'recaptcha':
@@ -357,6 +358,15 @@ class AuthController extends BaseController
             }
         }
 
+        if ($account_type == 1){
+            $type_value = 0;
+        }else{
+            if (!is_int($type_value) || $type_value <= 0){
+                $res['ret'] = 0;
+                $res['msg'] = "团队人员数量得是大于0的整数。";
+                return $this->echoJson($response, $res);
+            }
+        }
 
         //dumplin：1、邀请人等级为0则邀请码不可用；2、邀请人invite_num为可邀请次数，填负数则为无限
         $c = InviteCode::where('code', $code)->first();
@@ -499,17 +509,31 @@ class AuthController extends BaseController
         $user->ga_token = $secret;
         $user->ga_enable = 0;
 
+        $user->account_type = $account_type;
+        $user->type_value = $type_value;
 
-        if ($user->save()) {
+        try{
+            $user->save();
+            //生成子账号
+            $d_name = $user->user_name;
+            $d_email = explode('@', $user->email);
+            $d_im_type = $user->im_type;
+            $d_im_value = $user->im_value;
+            if ($account_type == 2){
+                for ($i = 1; $i <= $type_value; $i++) {
+                    $this->generateUser($user->id,$d_name,$d_email,$d_im_type,$d_im_value);
+                }
+            }
+
             $res['ret'] = 1;
             $res['msg'] = "注册成功！正在进入登录界面";
             Radius::Add($user, $user->passwd);
             return $response->getBody()->write(json_encode($res));
+        }catch (\Exception $exception) {
+            $res['ret'] = 0;
+            $res['msg'] = "未知错误";
+            return $response->getBody()->write(json_encode($res));
         }
-
-        $res['ret'] = 0;
-        $res['msg'] = "未知错误";
-        return $response->getBody()->write(json_encode($res));
     }
 
     public function logout($request, $response, $next)
@@ -583,5 +607,58 @@ class AuthController extends BaseController
         }
 
         return true; // Good to Go
+    }
+
+    public function generateUser($p_id,$d_name,$d_email,$d_im_type,$d_im_value)
+    {
+        $sub_user = new User();
+        $sub_user->user_name = $d_name . str_random(5);
+
+        $email_temp = [];
+        $email_temp[] = $d_email[0] . str_random(5);
+        $email_temp[] = $d_email[1];
+        $sub_user->email = implode('@', $email_temp);
+
+        $sub_user->pass = Hash::passwordHash(str_random(8));
+        $sub_user->passwd = Tools::genRandomChar(6);
+        $sub_user->port = Tools::getAvPort();
+        $sub_user->t = 0;
+        $sub_user->u = 0;
+        $sub_user->d = 0;
+        $sub_user->method = Config::get('reg_method');
+        $sub_user->protocol = Config::get('reg_protocol');
+        $sub_user->protocol_param = Config::get('reg_protocol_param');
+        $sub_user->obfs = Config::get('reg_obfs');
+        $sub_user->obfs_param = Config::get('reg_obfs_param');
+        $sub_user->forbidden_ip = Config::get('reg_forbidden_ip');
+        $sub_user->forbidden_port = Config::get('reg_forbidden_port');
+        $sub_user->im_type = $d_im_type;
+        $sub_user->im_value = $d_im_value;
+        $sub_user->transfer_enable = Tools::toGB(Config::get('defaultTraffic'));
+        $sub_user->invite_num = Config::get('inviteNum');
+        $sub_user->auto_reset_day = Config::get('reg_auto_reset_day');
+        $sub_user->auto_reset_bandwidth = Config::get('reg_auto_reset_bandwidth');
+        $sub_user->money = 0;
+        $sub_user->ref_by = 0;
+        $sub_user->class_expire = date("Y-m-d H:i:s", time() + Config::get('user_class_expire_default') * 3600);
+        $sub_user->class = Config::get('user_class_default');
+        $sub_user->node_connector = Config::get('user_conn');
+        $sub_user->node_speedlimit = Config::get('user_speedlimit');
+        $sub_user->expire_in = date("Y-m-d H:i:s", time() + Config::get('user_expire_in_default') * 86400);
+        $sub_user->reg_date = date("Y-m-d H:i:s");
+        $sub_user->reg_ip = $_SERVER["REMOTE_ADDR"];
+        $sub_user->plan = 'A';
+        $sub_user->theme = Config::get('theme');
+
+        $groups = explode(",", Config::get('ramdom_group'));
+        $sub_user->node_group = $groups[array_rand($groups)];
+
+        $ga = new GA();
+        $secret = $ga->createSecret();
+        $sub_user->ga_token = $secret;
+        $sub_user->ga_enable = 0;
+
+        $sub_user->p_id = $p_id;
+        $sub_user->save();
     }
 }

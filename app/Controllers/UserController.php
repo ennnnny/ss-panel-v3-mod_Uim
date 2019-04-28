@@ -1821,6 +1821,12 @@ class UserController extends BaseController
         $account_type = $request->getParam('account_type') ?? 1;
         $type_value = $request->getParam('type_value') ?? 0;
 
+        if ($account_type == 2 && (!is_int($type_value) || $type_value <= 0)){
+            $res['ret'] = 0;
+            $res['msg'] = "团队人员数量得是大于0的整数。";
+            return $this->echoJson($response, $res);
+        }
+
         $user = $this->user;
 
         try{
@@ -1858,55 +1864,7 @@ class UserController extends BaseController
                     $d_im_type = $user->im_type;
                     $d_im_value = $user->im_value;
                     for ($i = 1; $i <= $type_value; $i++) {
-                        $sub_user = new User();
-                        $sub_user->user_name = $d_name . str_random(5);
-
-                        $email_temp = [];
-                        $email_temp[] = $d_email[0] . str_random(5);
-                        $email_temp[] = $d_email[1];
-                        $sub_user->email = implode('@', $email_temp);
-
-                        $sub_user->pass = Hash::passwordHash(str_random(8));
-                        $sub_user->passwd = Tools::genRandomChar(6);
-                        $sub_user->port = Tools::getAvPort();
-                        $sub_user->t = 0;
-                        $sub_user->u = 0;
-                        $sub_user->d = 0;
-                        $sub_user->method = Config::get('reg_method');
-                        $sub_user->protocol = Config::get('reg_protocol');
-                        $sub_user->protocol_param = Config::get('reg_protocol_param');
-                        $sub_user->obfs = Config::get('reg_obfs');
-                        $sub_user->obfs_param = Config::get('reg_obfs_param');
-                        $sub_user->forbidden_ip = Config::get('reg_forbidden_ip');
-                        $sub_user->forbidden_port = Config::get('reg_forbidden_port');
-                        $sub_user->im_type = $d_im_type;
-                        $sub_user->im_value = $d_im_value;
-                        $sub_user->transfer_enable = Tools::toGB(Config::get('defaultTraffic'));
-                        $sub_user->invite_num = Config::get('inviteNum');
-                        $sub_user->auto_reset_day = Config::get('reg_auto_reset_day');
-                        $sub_user->auto_reset_bandwidth = Config::get('reg_auto_reset_bandwidth');
-                        $sub_user->money = 0;
-                        $sub_user->ref_by = 0;
-                        $sub_user->class_expire = date("Y-m-d H:i:s", time() + Config::get('user_class_expire_default') * 3600);
-                        $sub_user->class = Config::get('user_class_default');
-                        $sub_user->node_connector = Config::get('user_conn');
-                        $sub_user->node_speedlimit = Config::get('user_speedlimit');
-                        $sub_user->expire_in = date("Y-m-d H:i:s", time() + Config::get('user_expire_in_default') * 86400);
-                        $sub_user->reg_date = date("Y-m-d H:i:s");
-                        $sub_user->reg_ip = $_SERVER["REMOTE_ADDR"];
-                        $sub_user->plan = 'A';
-                        $sub_user->theme = Config::get('theme');
-
-                        $groups = explode(",", Config::get('ramdom_group'));
-                        $sub_user->node_group = $groups[array_rand($groups)];
-
-                        $ga = new GA();
-                        $secret = $ga->createSecret();
-                        $sub_user->ga_token = $secret;
-                        $sub_user->ga_enable = 0;
-
-                        $sub_user->p_id = $user->id;
-                        $sub_user->save();
+                        $this->generateUser($user->id,$d_name,$d_email,$d_im_type,$d_im_value);
                     }
                 }
             }else{
@@ -1925,5 +1883,58 @@ class UserController extends BaseController
         }
 
         return $this->echoJson($response, $res);
+    }
+
+    public function generateUser($p_id,$d_name,$d_email,$d_im_type,$d_im_value)
+    {
+        $sub_user = new User();
+        $sub_user->user_name = $d_name . str_random(5);
+
+        $email_temp = [];
+        $email_temp[] = $d_email[0] . str_random(5);
+        $email_temp[] = $d_email[1];
+        $sub_user->email = implode('@', $email_temp);
+
+        $sub_user->pass = Hash::passwordHash(str_random(8));
+        $sub_user->passwd = Tools::genRandomChar(6);
+        $sub_user->port = Tools::getAvPort();
+        $sub_user->t = 0;
+        $sub_user->u = 0;
+        $sub_user->d = 0;
+        $sub_user->method = Config::get('reg_method');
+        $sub_user->protocol = Config::get('reg_protocol');
+        $sub_user->protocol_param = Config::get('reg_protocol_param');
+        $sub_user->obfs = Config::get('reg_obfs');
+        $sub_user->obfs_param = Config::get('reg_obfs_param');
+        $sub_user->forbidden_ip = Config::get('reg_forbidden_ip');
+        $sub_user->forbidden_port = Config::get('reg_forbidden_port');
+        $sub_user->im_type = $d_im_type;
+        $sub_user->im_value = $d_im_value;
+        $sub_user->transfer_enable = Tools::toGB(Config::get('defaultTraffic'));
+        $sub_user->invite_num = Config::get('inviteNum');
+        $sub_user->auto_reset_day = Config::get('reg_auto_reset_day');
+        $sub_user->auto_reset_bandwidth = Config::get('reg_auto_reset_bandwidth');
+        $sub_user->money = 0;
+        $sub_user->ref_by = 0;
+        $sub_user->class_expire = date("Y-m-d H:i:s", time() + Config::get('user_class_expire_default') * 3600);
+        $sub_user->class = Config::get('user_class_default');
+        $sub_user->node_connector = Config::get('user_conn');
+        $sub_user->node_speedlimit = Config::get('user_speedlimit');
+        $sub_user->expire_in = date("Y-m-d H:i:s", time() + Config::get('user_expire_in_default') * 86400);
+        $sub_user->reg_date = date("Y-m-d H:i:s");
+        $sub_user->reg_ip = $_SERVER["REMOTE_ADDR"];
+        $sub_user->plan = 'A';
+        $sub_user->theme = Config::get('theme');
+
+        $groups = explode(",", Config::get('ramdom_group'));
+        $sub_user->node_group = $groups[array_rand($groups)];
+
+        $ga = new GA();
+        $secret = $ga->createSecret();
+        $sub_user->ga_token = $secret;
+        $sub_user->ga_enable = 0;
+
+        $sub_user->p_id = $p_id;
+        $sub_user->save();
     }
 }

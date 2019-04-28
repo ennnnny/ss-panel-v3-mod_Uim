@@ -32,6 +32,20 @@
         <label for="contect">联络方式账号</label>
         <input v-model="contect" type="text" name="contect">
       </div>
+
+      <div class="input-control flex wrap">
+        <label for="account_type">选择您的账号类型</label>
+        <select v-model="account_type" name="imtype" id="account_type">
+          <option value="1">个人</option>
+          <option value="2">团队</option>
+        </select>
+      </div>
+      <div class="input-control flex wrap" v-if="account_type == 2">
+        <label for="type_value">团队人员数量</label>
+        <input v-model="type_value" type="number" name="type_value">
+      </div>
+
+
       <div v-if="globalConfig.registMode === 'invite'" class="input-control flex">
         <label for="code">邀请码(必填)</label>
         <input v-model="code" type="text" name="code">
@@ -90,7 +104,9 @@ export default {
       email_code: '',
       isDisabled: false,
       vmText: '获取邮箱验证码',
-      isVmDisabled: false
+      isVmDisabled: false,
+      account_type: 1,
+      type_value: 0,
     }
   },
   methods: {
@@ -104,7 +120,9 @@ export default {
         repasswd: this.repasswd,
         wechat: this.contect,
         imtype: this.imtype,
-        code: this.code
+        code: this.code,
+        account_type: this.account_type,
+        type_value: this.type_value
       }
 
       let callConfig = {
