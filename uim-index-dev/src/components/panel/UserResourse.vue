@@ -192,6 +192,7 @@ export default {
       _get("/gettransfer", "include").then(r => {
         if (r.ret === 1) {
           this.addNewUserCon(r.arr);
+          this.calcExpireDays(this.userCon.class_expire, this.userCon.expire_in);
           this.reConfigResourse();
           this.showTransition("isDataRefreshed");
         } else if (r.ret === 0) {

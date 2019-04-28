@@ -238,6 +238,15 @@ class VueController extends BaseController
         }
 
         $shops = Shop::where("status", 1)->orderBy("name")->get();
+        foreach ($shops as &$shop) {
+            if ($user->account_type == 2){
+                if ($user->type_value >= 5){//打折（团队人数超5人打8折）
+                    $shop->price = number_format(($shop->price * $user->type_value * 0.8),2,'.','');
+                }else{
+                    $shop->price = number_format(($shop->price * $user->type_value),2,'.','');
+                }
+            }
+        }
 
         $res['arr'] = array(
             'shops' => $shops,

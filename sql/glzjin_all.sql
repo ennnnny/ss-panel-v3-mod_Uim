@@ -701,3 +701,4 @@ ALTER TABLE `user` ADD `discord` BIGINT NULL AFTER `telegram_id`;
 ALTER TABLE `user` ADD `account_type` TINYINT NOT NULL DEFAULT '1';
 ALTER TABLE `user` ADD `type_value` INT NOT NULL DEFAULT '0';
 ALTER TABLE `user` ADD `p_id` INT NOT NULL DEFAULT '0';
+ALTER TABLE `bought` ADD `p_id` INT NOT NULL DEFAULT '0';

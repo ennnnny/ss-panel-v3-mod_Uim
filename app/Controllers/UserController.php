@@ -1014,11 +1014,20 @@ class UserController extends BaseController
             return $response->getBody()->write(json_encode($res));
         }
 
+        $price = $shop->price;
+        if ($user->account_type == 2){
+            if ($user->type_value >= 5){//打折（团队人数超5人打8折）
+                $price = number_format(($shop->price * $user->type_value * 0.8),2,'.','');
+            }else{
+                $price = number_format(($shop->price * $user->type_value),2,'.','');
+            }
+        }
+
         if ($coupon == "") {
             $res['ret'] = 1;
             $res['name'] = $shop->name;
             $res['credit'] = "0 %";
-            $res['total'] = $shop->price . "元";
+            $res['total'] = $price . "元";
             return $response->getBody()->write(json_encode($res));
         }
 
@@ -1099,8 +1108,18 @@ class UserController extends BaseController
             }
         }
 
-        $price = $shop->price * ((100 - $credit) / 100);
         $user = $this->user;
+        if ($user->account_type == 1){
+            $shop_price = $shop->price;
+        }elseif ($user->account_type == 2){
+            if ($user->type_value >= 5){//打折（团队人数超5人打8折）
+                $shop_price = number_format(($shop->price * $user->type_value * 0.8),2,'.','');
+            }else{
+                $shop_price = number_format(($shop->price * $user->type_value),2,'.','');
+            }
+        }
+
+        $price = $shop_price * ((100 - $credit) / 100);
 
         if (!$user->isLogin) {
             $res['ret'] = -1;
@@ -1149,12 +1168,41 @@ class UserController extends BaseController
 
 
         if (isset($onetime)) {
-            $price = $shop->price;
+            $price = $shop_price;
         }
         $bought->price = $price;
         $bought->save();
 
         $shop->buy($user);
+
+        $sub_users = User::query()->where('p_id',$user->id)->get();
+        //生成子账号购买记录
+        foreach ($sub_users as $sub_user) {
+            $bought_temp = new Bought();
+            $bought_temp->userid = $sub_user->id;
+            $bought_temp->shopid = $bought->shopid;
+            $bought_temp->datetime = $bought->datetime;
+            $bought_temp->renew = $bought->renew;
+            $bought_temp->coupon = $bought->coupon;
+            $bought_temp->price = 0;
+            $bought_temp->p_id = $bought->id;
+            $bought_temp->save();
+
+            $shop->buy($sub_user);
+        }
+
+        //改端口，重置订阅
+        $origin_port = $user->port;
+        $user->port = Tools::getAvPort();
+        $relay_rules = Relay::where('user_id', $user->id)->where('port', $origin_port)->get();
+        foreach ($relay_rules as $rule) {
+            $rule->port = $user->port;
+            $rule->save();
+        }
+        $user->save();
+
+        $user->clean_link();
+        LinkController::GenerateSSRSubCode($user->id, 0);
 
         $res['ret'] = 1;
         $res['msg'] = "购买成功";
