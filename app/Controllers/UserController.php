@@ -1867,7 +1867,7 @@ class UserController extends BaseController
     public function updateAccountType($request,$response)
     {
         $account_type = $request->getParam('account_type') ?? 1;
-        $type_value = $request->getParam('type_value') ?? 0;
+        $type_value = (int)$request->getParam('type_value') ?? 0;
 
         if ($account_type == 2 && (!is_int($type_value) || $type_value <= 0)){
             $res['ret'] = 0;
