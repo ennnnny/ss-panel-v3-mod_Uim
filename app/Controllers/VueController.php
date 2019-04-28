@@ -147,6 +147,27 @@ class VueController extends BaseController
         $subUrl = Config::get('subUrl');
         $baseUrl = Config::get('baseUrl');
         $user['online_ip_count'] = $user->online_ip_count();
+        if ($user->account_type == 2) {
+            //团体账户处理
+            $sub_users = User::query()->where('p_id',$user->id)->get();
+            $port = $passwd = $method = $protocol = $obfs = $obfs_param = [];
+            foreach ($sub_users as $sub_user) {
+                $port[] = $sub_user->port;
+                $passwd[] = $sub_user->passwd;
+                $method[] = $sub_user->method;
+                $protocol[] = $sub_user->protocol;
+                $obfs[] = $sub_user->obfs;
+                $obfs_param[] = $sub_user->obfs_param;
+            }
+            $user['all_port'] = $port;
+            $user->passwd = $passwd;
+            $user->method = $method;
+            $user->protocol = $protocol;
+            $user->obfs = $obfs;
+            $user->obfs_param = $obfs_param;
+        }else{
+            $user['all_port'] = $user->port;
+        }
 
         $res['info'] = array(
             "user" => $user,
@@ -304,11 +325,26 @@ class VueController extends BaseController
             return $response->getBody()->write(json_encode($res));
         }
 
-        $res['arr'] = array(
-            "todayUsedTraffic" => $user->TodayusedTraffic(),
-            "lastUsedTraffic" => $user->LastusedTraffic(),
-            "unUsedTraffic" => $user->unusedTraffic(),
-        );
+        if ($user->account_type == 1){//个人账号
+            $res['arr'] = array(
+                "todayUsedTraffic" => $user->TodayusedTraffic(),
+                "lastUsedTraffic" => $user->LastusedTraffic(),
+                "unUsedTraffic" => $user->unusedTraffic(),
+            );
+        }else{//团体账号
+            $todayUsedTraffic = $lastUsedTraffic = $unUsedTraffic = 0;
+            $sub_users = User::query()->where('p_id',$user->id)->get();
+            foreach ($sub_users as $sub_user) {
+                $todayUsedTraffic = $todayUsedTraffic + ($sub_user->u + $sub_user->d - $sub_user->last_day_t);
+                $lastUsedTraffic = $lastUsedTraffic + $sub_user->last_day_t;
+                $unUsedTraffic = $unUsedTraffic + ($sub_user->transfer_enable - $sub_user->u - $sub_user->d);
+            }
+            $res['arr'] = array(
+                "todayUsedTraffic" => Tools::flowAutoShow($todayUsedTraffic),
+                "lastUsedTraffic" => Tools::flowAutoShow($lastUsedTraffic),
+                "unUsedTraffic" => Tools::flowAutoShow($unUsedTraffic),
+            );
+        }
 
         $res['ret'] = 1;
 

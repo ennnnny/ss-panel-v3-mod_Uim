@@ -87,6 +87,12 @@ export default {
       for (let i = 0; i < resourse.length; i++) {
         switch (resourse[i].name) {
           case "在线设备数":
+            if (this.userCon.account_type == 2){
+              this.setReasourseName({
+                index: i,
+                name: "在线设备数/个"
+              });
+            }
             if (this.userCon.node_connector !== 0) {
               this.setReasourse({
                 index: i,

@@ -43,6 +43,7 @@ export default {
       setUserMoney: 'SET_USERMONEY',
       setInviteNum: 'SET_INVITE_NUM',
       setReasourse: 'SET_RESOURSE',
+      setReasourseName: 'SET_RESOURSE_NAME',
       setUserCon: 'SET_USERCON',
       setUserSettings: 'SET_USERSETTINGS',
       addNewUserCon: 'ADD_NEWUSERCON',

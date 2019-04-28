@@ -88,7 +88,7 @@ export default {
       state.userCon.invite_num = number
     },
     SET_USERSETTINGS(state, config) {
-      state.userSettings.tipsLink[0].content = config.port
+      state.userSettings.tipsLink[0].content = config.all_port
       state.userSettings.tipsLink[1].content = config.passwd
       state.userSettings.tipsLink[2].content = config.method
       state.userSettings.tipsLink[3].content = config.protocol
@@ -102,6 +102,9 @@ export default {
     },
     SET_RESOURSE(state, config) {
       state.userSettings.resourse[config.index].content = config.content
+    },
+    SET_RESOURSE_NAME(state, config) {
+      state.userSettings.resourse[config.index].name = config.name
     },
     SET_ALLURESOURSE(state, config) {
       for (let key in config) {
