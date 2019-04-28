@@ -510,4 +510,14 @@ class VueController extends BaseController
 
         return $response->getBody()->write(json_encode($res));
     }
+
+    public function getBing($request,$response)
+    {
+        $base_uri = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN';
+        $res = file_get_contents($base_uri);
+        $res_temp = json_decode($res,true);
+        $res_url = 'https://www.bing.com/'.$res_temp['images'][0]['url'];
+
+        return $response->withStatus(302)->withHeader('Location', $res_url);
+    }
 }

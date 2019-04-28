@@ -6,7 +6,7 @@
         var ct=document.getElementsByTagName("script")[0];
         ct.parentNode.insertBefore(nt,ct);
       }
-      add_chatinline();</script>{/if}<script src=/assets/js/fuck.js></script><link href=/vuedist/css/app.049d98c6.css rel=preload as=style><link href=/vuedist/js/app.358062c4.js rel=preload as=script><link href=/vuedist/js/chunk-vendors.34b71f40.js rel=preload as=script><link href=/vuedist/css/app.049d98c6.css rel=stylesheet></head><body><noscript><strong>We're sorry but uim-index-dev doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id=app></div>{if $config["sspanelAnalysis"] == 'true'}<script>window.ga=window.ga||function(){ (ga.q=ga.q||[]).push(arguments) };ga.l=+new Date;
+      add_chatinline();</script>{/if}<script src=/assets/js/fuck.js></script><link href=/vuedist/css/app.92fad84f.css rel=preload as=style><link href=/vuedist/js/app.358062c4.js rel=preload as=script><link href=/vuedist/js/chunk-vendors.34b71f40.js rel=preload as=script><link href=/vuedist/css/app.92fad84f.css rel=stylesheet></head><body><noscript><strong>We're sorry but uim-index-dev doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id=app></div>{if $config["sspanelAnalysis"] == 'true'}<script>window.ga=window.ga||function(){ (ga.q=ga.q||[]).push(arguments) };ga.l=+new Date;
         ga('create', 'UA-111801619-3', 'auto');
         var hostDomain = window.location.host || document.location.host || document.domain;
         ga('set', 'dimension1', hostDomain);

@@ -387,6 +387,7 @@ $app->get('/gettransfer', 'App\Controllers\VueController:getTransfer');
 $app->get('/getCaptcha', 'App\Controllers\VueController:getCaptcha');
 $app->post('/getChargeLog', 'App\Controllers\VueController:getChargeLog');
 $app->get('/getnodelist', 'App\Controllers\VueController:getNodeList');
+$app->get('/bing','App\Controllers\VueController:getBing');
 
 /**
  * chenPay
