@@ -1058,7 +1058,7 @@ class UserController extends BaseController
         $res['ret'] = 1;
         $res['name'] = $shop->name;
         $res['credit'] = $coupon->credit . " %";
-        $res['total'] = $shop->price * ((100 - $coupon->credit) / 100) . "元";
+        $res['total'] = $price * ((100 - $coupon->credit) / 100) . "元";
 
         return $response->getBody()->write(json_encode($res));
     }
