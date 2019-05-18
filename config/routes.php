@@ -75,7 +75,6 @@ $app->get('/404', 'App\Controllers\HomeController:page404');
 $app->get('/405', 'App\Controllers\HomeController:page405');
 $app->get('/500', 'App\Controllers\HomeController:page500');
 $app->post('/notify', 'App\Controllers\HomeController:notify');
-$app->get('/yft/notify', 'App\Services\Gateway\YftPay:notify');//yft uses GET
 $app->get('/tos', 'App\Controllers\HomeController:tos');
 $app->get('/staff', 'App\Controllers\HomeController:staff');
 $app->post('/telegram_callback', 'App\Controllers\HomeController:telegram');
@@ -117,7 +116,7 @@ $app->group('/user', function () {
     $this->post('/ticket', 'App\Controllers\UserController:ticket_add');
     $this->get('/ticket/{id}/view', 'App\Controllers\UserController:ticket_view');
     $this->put('/ticket/{id}', 'App\Controllers\UserController:ticket_update');
-	
+
     $this->post('/buy_invite', 'App\Controllers\UserController:buyInvite');
     $this->post('/custom_invite', 'App\Controllers\UserController:customInvite');
     $this->get('/edit', 'App\Controllers\UserController:edit');
@@ -136,12 +135,6 @@ $app->group('/user', function () {
     $this->get('/logout', 'App\Controllers\UserController:logout');
     $this->get('/backtoadmin', 'App\Controllers\UserController:backtoadmin');
     $this->get('/code', 'App\Controllers\UserController:code');
-    //易付通路由定义 start
-    $this->post('/code/yft/pay', 'App\Services\Gateway\YftPay:yftPay');
-    $this->get('/code/yft/pay/result', 'App\Services\Gateway\YftPay:notify');
-    $this->post('/code/yft', 'App\Services\Gateway\YftPay:yft');
-    $this->get('/yftOrder', 'App\Services\Gateway\YftPay:yftOrder');
-    //易付通路由定义 end
     $this->get('/alipay', 'App\Controllers\UserController:alipay');
     $this->post('/code/f2fpay', 'App\Services\Payment:purchase');
     $this->get('/code/codepay', 'App\Services\Payment:purchase');
@@ -309,7 +302,6 @@ $app->group('/admin', function () {
     $this->get('/sys', 'App\Controllers\AdminController:sys');
     $this->get('/logout', 'App\Controllers\AdminController:logout');
     $this->post('/payback/ajax', 'App\Controllers\AdminController:ajax_payback');
-    $this->get('/yftOrder', 'App\Services\Gateway\YftPay:yftOrderForAdmin');
 })->add(new Admin());
 
 // API
@@ -318,7 +310,7 @@ $app->group('/api', function () {
     $this->post('/token', 'App\Controllers\ApiController:newToken');
     $this->get('/node', 'App\Controllers\ApiController:node')->add(new Api());
     $this->get('/user/{id}', 'App\Controllers\ApiController:userInfo')->add(new Api());
-    $this->get('/sublink','App\Controllers\Client\ClientApiController:GetSubLink');
+    $this->get('/sublink', 'App\Controllers\Client\ClientApiController:GetSubLink');
 });
 
 // mu

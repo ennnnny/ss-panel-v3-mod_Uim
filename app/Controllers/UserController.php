@@ -1210,7 +1210,7 @@ class UserController extends BaseController
     {
         $title = $request->getParam('title');
         $content = $request->getParam('content');
-
+        $markdown = $request->getParam('markdown');
 
         if ($title == "" || $content == "") {
             $res['ret'] = 0;
@@ -1224,9 +1224,7 @@ class UserController extends BaseController
             return $this->echoJson($response, $res);
         }
 
-
         $ticket = new Ticket();
-
         $antiXss = new AntiXSS();
 
         $ticket->title = $antiXss->xss_clean($title);
@@ -1236,19 +1234,38 @@ class UserController extends BaseController
         $ticket->datetime = time();
         $ticket->save();
 
-        $adminUser = User::where("is_admin", "=", "1")->get();
-        foreach ($adminUser as $user) {
-            $subject = Config::get('appName') . "-新工单被开启";
-            $to = $user->email;
-            $text = "管理员，有人开启了新的工单，请您及时处理。";
-            try {
-                Mail::send($to, $subject, 'news/warn.tpl', [
-                    "user" => $user, "text" => $text
-                ], [
-                ]);
-            } catch (\Exception $e) {
-                echo $e->getMessage();
+        if (Config::get('mail_ticket') == 'true' && $markdown != '') {
+            $adminUser = User::where("is_admin", "=", "1")->get();
+            foreach ($adminUser as $user) {
+                $subject = Config::get('appName') . "-新工单被开启";
+                $to = $user->email;
+                $text = "管理员，有人开启了新的工单，请您及时处理。";
+                try {
+                    Mail::send($to, $subject, 'news/warn.tpl', [
+                        "user" => $user, "text" => $text
+                    ], [
+                    ]);
+                } catch (\Exception $e) {
+                    echo $e->getMessage();
+                }
             }
+        }
+
+        if (Config::get('useScFtqq') == 'true' && $markdown != '') {
+            $ScFtqq_SCKEY = Config::get('ScFtqq_SCKEY');
+            $postdata = http_build_query(
+                array(
+                    'text' => Config::get('appName') . "-新工单被开启",
+                    'desp' => $markdown
+                ));
+            $opts = array('http' =>
+                array(
+                    'method' => 'POST',
+                    'header' => 'Content-type: application/x-www-form-urlencoded',
+                    'content' => $postdata
+                ));
+            $context = stream_context_create($opts);
+            file_get_contents('https://sc.ftqq.com/' . $ScFtqq_SCKEY . '.send', false, $context);
         }
 
         $res['ret'] = 1;
@@ -1261,6 +1278,7 @@ class UserController extends BaseController
         $id = $args['id'];
         $content = $request->getParam('content');
         $status = $request->getParam('status');
+        $markdown = $request->getParam('markdown');
 
         if ($content == "" || $status == "") {
             $res['ret'] = 0;
@@ -1282,34 +1300,71 @@ class UserController extends BaseController
         }
 
         if ($status == 1 && $ticket_main->status != $status) {
-            $adminUser = User::where("is_admin", "=", "1")->get();
-            foreach ($adminUser as $user) {
-                $subject = Config::get('appName') . "-工单被重新开启";
-                $to = $user->email;
-                $text = "管理员，有人重新开启了<a href=\"" . Config::get('baseUrl') . "/admin/ticket/" . $ticket_main->id . "/view\">工单</a>，请您及时处理。";
-                try {
-                    Mail::send($to, $subject, 'news/warn.tpl', [
-                        "user" => $user, "text" => $text
-                    ], [
-                    ]);
-                } catch (\Exception $e) {
-                    echo $e->getMessage();
+            if (Config::get('mail_ticket') == 'true' && $markdown != '') {
+                $adminUser = User::where("is_admin", "=", "1")->get();
+                foreach ($adminUser as $user) {
+                    $subject = Config::get('appName') . "-工单被重新开启";
+                    $to = $user->email;
+                    $text = "管理员，有人重新开启了<a href=\"" . Config::get('baseUrl') . "/admin/ticket/" . $ticket_main->id . "/view\">工单</a>，请您及时处理。";
+                    try {
+                        Mail::send($to, $subject, 'news/warn.tpl', [
+                            "user" => $user, "text" => $text
+                        ], [
+                        ]);
+                    } catch (\Exception $e) {
+                        echo $e->getMessage();
+                    }
                 }
             }
+            if (Config::get('useScFtqq') == 'true' && $markdown != '') {
+                $ScFtqq_SCKEY = Config::get('ScFtqq_SCKEY');
+                $postdata = http_build_query(
+                    array(
+                        'text' => Config::get('appName') . "-工单被重新开启",
+                        'desp' => $markdown
+                    ));
+                $opts = array('http' =>
+                    array(
+                        'method' => 'POST',
+                        'header' => 'Content-type: application/x-www-form-urlencoded',
+                        'content' => $postdata
+                    ));
+                $context = stream_context_create($opts);
+                file_get_contents('https://sc.ftqq.com/' . $ScFtqq_SCKEY . '.send', false, $context);
+                $useScFtqq = Config::get('ScFtqq_SCKEY');
+            }
         } else {
-            $adminUser = User::where("is_admin", "=", "1")->get();
-            foreach ($adminUser as $user) {
-                $subject = Config::get('appName') . "-工单被回复";
-                $to = $user->email;
-                $text = "管理员，有人回复了<a href=\"" . Config::get('baseUrl') . "/admin/ticket/" . $ticket_main->id . "/view\">工单</a>，请您及时处理。";
-                try {
-                    Mail::send($to, $subject, 'news/warn.tpl', [
-                        "user" => $user, "text" => $text
-                    ], [
-                    ]);
-                } catch (\Exception $e) {
-                    echo $e->getMessage();
+            if (Config::get('mail_ticket') == 'true' && $markdown != '') {
+                $adminUser = User::where("is_admin", "=", "1")->get();
+                foreach ($adminUser as $user) {
+                    $subject = Config::get('appName') . "-工单被回复";
+                    $to = $user->email;
+                    $text = "管理员，有人回复了<a href=\"" . Config::get('baseUrl') . "/admin/ticket/" . $ticket_main->id . "/view\">工单</a>，请您及时处理。";
+                    try {
+                        Mail::send($to, $subject, 'news/warn.tpl', [
+                            "user" => $user, "text" => $text
+                        ], [
+                        ]);
+                    } catch (\Exception $e) {
+                        echo $e->getMessage();
+                    }
                 }
+            }
+            if (Config::get('useScFtqq') == 'true' && $markdown != '') {
+                $ScFtqq_SCKEY = Config::get('ScFtqq_SCKEY');
+                $postdata = http_build_query(
+                    array(
+                        'text' => Config::get('appName') . "-工单被回复",
+                        'desp' => $markdown
+                    ));
+                $opts = array('http' =>
+                    array(
+                        'method' => 'POST',
+                        'header' => 'Content-type: application/x-www-form-urlencoded',
+                        'content' => $postdata
+                    ));
+                $context = stream_context_create($opts);
+                file_get_contents('https://sc.ftqq.com/' . $ScFtqq_SCKEY . '.send', false, $context);
             }
         }
 
