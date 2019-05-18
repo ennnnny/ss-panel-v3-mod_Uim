@@ -1182,8 +1182,7 @@ class UserController extends BaseController
             $bought_temp->userid = $sub_user->id;
             $bought_temp->shopid = $bought->shopid;
             $bought_temp->datetime = $bought->datetime;
-            $bought_temp->renew = $bought->renew;
-            $bought_temp->coupon = $bought->coupon;
+            $bought_temp->renew = 0;
             $bought_temp->price = 0;
             $bought_temp->p_id = $bought->id;
             $bought_temp->save();
