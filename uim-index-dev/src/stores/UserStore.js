@@ -71,6 +71,10 @@ export default {
         {
           name: '混淆参数',
           content: ''
+        },
+        {
+          name: '订阅地址',
+          content: ''
         }
       ]
     },
@@ -94,6 +98,7 @@ export default {
       state.userSettings.tipsLink[3].content = config.protocol
       state.userSettings.tipsLink[4].content = config.obfs
       state.userSettings.tipsLink[5].content = config.obfs_param
+      state.userSettings.tipsLink[6].content = config.rss
     },
     ADD_NEWUSERCON(state, config) {
       for (let key in config) {

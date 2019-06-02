@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\InviteCode;
+use App\Models\Link;
 use App\Models\User;
 use App\Models\Code;
 use App\Models\Payback;
@@ -150,7 +151,7 @@ class VueController extends BaseController
         if ($user->account_type == 2) {
             //团体账户处理
             $sub_users = User::query()->where('p_id',$user->id)->where('enable',1)->get();
-            $port = $passwd = $method = $protocol = $obfs = $obfs_param = [];
+            $port = $passwd = $method = $protocol = $obfs = $obfs_param = $links = [];
             foreach ($sub_users as $sub_user) {
                 $port[] = $sub_user->port;
                 $passwd[] = $sub_user->passwd;
@@ -158,6 +159,13 @@ class VueController extends BaseController
                 $protocol[] = $sub_user->protocol;
                 $obfs[] = $sub_user->obfs;
                 $obfs_param[] = $sub_user->obfs_param;
+                $link = Link::query()->where('userid', $sub_user->id)->where('type',11)->where('geo',0)->first();
+                if ($link == null){
+                    //新增
+                    $links[] = LinkController::GenerateSSRSubCode($sub_user->id, 0);
+                }else{
+                    $links[] = $link->token;
+                }
             }
             $user['all_port'] = $port;
             $user->passwd = $passwd;
@@ -165,8 +173,17 @@ class VueController extends BaseController
             $user->protocol = $protocol;
             $user->obfs = $obfs;
             $user->obfs_param = $obfs_param;
+            $user['rss'] = $links;
         }else{
             $user['all_port'] = $user->port;
+            $link = Link::query()->where('userid', $user->id)->where('type',11)->where('geo',0)->first();
+            if ($link == null){
+                //新增
+                $rss = LinkController::GenerateSSRSubCode($user->id, 0);
+            }else{
+                $rss = $link->token;
+            }
+            $user['rss'] = $rss;
         }
 
         $res['info'] = array(

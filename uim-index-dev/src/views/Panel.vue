@@ -199,6 +199,7 @@
                 :resourseTrans="userResourseTrans"
                 :is="userSettings.pages[1].id"
                 :initialSet="userSettings"
+                :prop-data="ssrInfo"
                 class="settiings-toolbar card margin-nobottom"
               ></component>
             </keep-alive>
@@ -315,6 +316,12 @@ export default {
             muType: "mu2",
             subUrl: this.suburlMu2
           };
+      }
+    },
+    ssrInfo: function() {
+      return {
+        currentDlType: this.currentDlType,
+        subUrl: this.subUrl
       }
     },
     currentCardComponentIndex: function() {

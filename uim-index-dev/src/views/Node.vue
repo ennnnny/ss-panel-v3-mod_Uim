@@ -16,7 +16,7 @@
         <div class="pure-u-1 pure-u-xl-6-24 pure-g usrcenter-left">
           <div class="card">
             <div class="flex space-between align-center">
-              <div class="card-title">节点详情</div>
+              <div class="card-title">节点详情(点击节点名称查看)</div>
             </div>
             <div class="card-body">
               <div>节点地址：{{currentNode.server}}</div>
