@@ -25,40 +25,24 @@
         </div>
         <div class="pure-u-1 pure-u-xl-17-24">
           <div class="card margin-nobottom-sm">
-            <div class="flex space-between align-center">
-              <div class="card-title">节点列表</div>
-              <div class="card-title-right">
-                <uim-dropdown>
-                  <template #dpbtn-content>
-                    <transition name="fade" mode="out-in">
-                      <div
-                        :key="currentNodeClass"
-                      >{{currentNodeClass===0 ? '普通节点' : "VIP " + currentNodeClass}}</div>
-                    </transition>
-                  </template>
-                  <template #dp-menu>
-                    <li
-                      @click="nodeClassChange(item.class)"
-                      v-for="item in classDrop"
-                      :key="item.class"
-                    >{{item.name}}</li>
-                  </template>
-                </uim-dropdown>
+            <template v-for="item in classDrop">
+              <div class="flex space-between align-center">
+                <div class="card-title">{{item.name}}</div>
               </div>
-            </div>
-            <div class="card-body">
-              <div class="nodelist">
-                <div
-                  v-for="(node, index) in nodeFilter"
-                  :class="{ 'nodeitem-avtive':currentNode.id === node.id }"
-                  class="nodeitem"
-                  :key="node.id"
-                  @click="setCurrentNode(index)"
-                >
-                  <div class="nodename">{{node.name}}</div>
+              <div class="card-body">
+                <div class="nodelist">
+                  <div
+                    v-for="(node, index) in allNode[item.class]"
+                    :class="{ 'nodeitem-avtive':currentNode.id === node.id }"
+                    class="nodeitem"
+                    :key="node.id"
+                    @click="setCurrentNode(node)"
+                  >
+                    <div class="nodename">{{node.name}}</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </template>
           </div>
         </div>
       </div>
@@ -116,15 +100,19 @@ export default {
       currentNodeClass: 0,
       nodeList: [],
       user: {},
-      currentNode: {}
+      currentNode: {},
+      allNode: {}
     };
   },
   methods: {
     nodeClassChange(num) {
       this.currentNodeClass = num;
     },
-    setCurrentNode(index) {
-      this.currentNode = this.nodeFilter[index];
+    setCurrentNode(node) {
+      this.currentNode = node;//this.nodeFilter[index];
+    },
+    setMapValue(index, key, value) {
+      this.$set(this.allNode[index], key, value)
     }
   },
   mounted() {
@@ -139,7 +127,19 @@ export default {
           this.user = r.nodeinfo.user;
 
           this.currentNodeClass = this.nodeList[0].class;
-          this.setCurrentNode(0);
+          // this.setCurrentNode(0);
+
+          //新增全部节点数据
+          this.classDrop.forEach(item =>{
+            let tempNode = [];
+            for (let i = 0; i <= this.nodeList.length - 1; i++) {
+              if (item.class == this.nodeList[i].class){
+                tempNode.push(this.nodeList[i])
+              }
+            }
+            this.allNode[item.class] = tempNode;
+          });
+          window.console.log('allNode',this.allNode);
         }
         return r;
       })
