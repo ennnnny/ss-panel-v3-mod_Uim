@@ -323,7 +323,7 @@ class XCat
                         $new_query = build_query($query, false);
                         $temp = explode('?', $node_info);
                         $temp[1] = $new_query;
-                        $param[] = 'ssr://' . implode('?', $temp);
+                        $param[] = 'ssr://' . Tools::base64_url_encode(implode('?', $temp));
                     }
                 }
             }
