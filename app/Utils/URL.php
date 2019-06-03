@@ -237,8 +237,8 @@ class URL
     public static function getAllUrl($user, $is_mu, $is_ss = 0) {
         $return_url = '';
 		if(!$is_ss){
-			$return_url .= URL::getUserTraffic($user, $is_mu).PHP_EOL;
-			$return_url .= URL::getUserClassExpiration($user, $is_mu).PHP_EOL;
+			$return_url .= URL::getUserTraffic($user, $is_mu).PHP_EOL;//剩余流量
+			$return_url .= URL::getUserClassExpiration($user, $is_mu).PHP_EOL;//过期时间
 		}
         if(strtotime($user->expire_in)<time()){
 			return $return_url;

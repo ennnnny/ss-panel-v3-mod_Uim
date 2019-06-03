@@ -82,7 +82,8 @@ class LinkController extends BaseController
         }
 
         $newResponse = $response->withHeader('Content-type', ' application/octet-stream; charset=utf-8')->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate')->withHeader('Content-Disposition', ' attachment; filename='.$token.'.txt');
-        $newResponse->getBody()->write(LinkController::GetSSRSub(User::where("id", "=", $Elink->userid)->first(), $mu));
+        $res = LinkController::GetSSRSub(User::where("id", "=", $Elink->userid)->first(), $mu);
+		$newResponse->getBody()->write($res);
         return $newResponse;
     }
 
@@ -93,7 +94,15 @@ class LinkController extends BaseController
     public static function GetSSRSub($user, $mu = 0)
     {
         if ($mu==0||$mu==1) {
-            return Tools::base64_url_encode(URL::getAllUrl($user, $mu, 0));
+            $info = URL::getAllUrl($user, $mu, 0);
+            $ssr_info = file_get_contents(BASE_PATH . '/storage/ssr.txt');
+            if (!empty($ssr_info)){
+                $info = explode(PHP_EOL,$info);
+                $ssr_info = explode(PHP_EOL,$ssr_info);
+                $info = array_merge($info,$ssr_info);
+                $info = implode(PHP_EOL,array_filter($info));
+            }
+            return Tools::base64_url_encode($info);
         } 
 		elseif ($mu == LinkController::V2RYA_MU){
             return Tools::base64_url_encode(URL::getAllVMessUrl($user));

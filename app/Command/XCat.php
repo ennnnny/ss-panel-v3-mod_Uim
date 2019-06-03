@@ -17,6 +17,8 @@ use App\Services\Config;
 
 use App\Utils\GA;
 use App\Utils\QRcode;
+use function GuzzleHttp\Psr7\build_query;
+use function GuzzleHttp\Psr7\parse_query;
 
 class XCat
 {
@@ -98,6 +100,8 @@ class XCat
                 return $this->sendDailyUsageByTG();
 			case('npmbuild'):
 				return $this->npmbuild();
+            case('ssr'):
+                return $this->getSsr();
 			default:
                 return $this->defaultAction();
         }
@@ -291,5 +295,41 @@ class XCat
 		system('npm install');
 		system('npm run build');
 		system('cp -u ../public/vuedist/index.html ../resources/views/material/index.tpl');
+	}
+
+    public function getSsr()
+    {
+        //获取最新的数据
+        $info = file_get_contents(Tools::base64_url_decode('aHR0cHM6Ly9zc3JzdWIuMDBvbzAwMC5vb28v)'));
+//        $info = file_get_contents(BASE_PATH . '/storage/ssr_source.txt');
+        if (!empty($info)) {
+            file_put_contents(BASE_PATH . '/storage/ssr_source.txt', $info);
+            $info = Tools::base64_url_decode($info);
+//            file_put_contents(BASE_PATH . '/storage/ssr.txt',$info);
+            $info = explode(PHP_EOL,$info);
+            $param = [];
+            $group_name = Config::get('appName');
+            $num = 1;
+            foreach ($info as $item) {
+                $node_info = Tools::base64_url_decode(ltrim($item,'ssr://'));
+                //替换文本
+                $url = parse_url($node_info);
+                if (isset($url['query'])) {
+                    $query = parse_query($url['query'], false);
+                    $remarks = Tools::base64_url_decode($query['remarks']);
+                    if (strpos($remarks, '最后更新') === false) {
+                        $query['remarks'] = Tools::base64_url_encode('pojieapp ' . $num);
+                        $query['group'] = Tools::base64_url_encode($group_name);
+                        $new_query = build_query($query, false);
+                        $temp = explode('?', $node_info);
+                        $temp[1] = $new_query;
+                        $param[] = 'ssr://' . implode('?', $temp);
+                    }
+                }
+            }
+            if (count($param) > 0){
+                file_put_contents(BASE_PATH . '/storage/ssr.txt',implode(PHP_EOL,$param));
+            }
+        }
 	}
 }
