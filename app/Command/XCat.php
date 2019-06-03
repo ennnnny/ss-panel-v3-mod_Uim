@@ -318,7 +318,7 @@ class XCat
                     $query = parse_query($url['query'], false);
                     $remarks = Tools::base64_url_decode($query['remarks']);
                     if (strpos($remarks, '最后更新') === false) {
-                        $query['remarks'] = Tools::base64_url_encode('pojieapp ' . $num);
+                        $query['remarks'] = Tools::base64_url_encode('泡面 ' . $num);
                         $query['group'] = Tools::base64_url_encode($group_name);
                         $new_query = build_query($query, false);
                         $temp = explode('?', $node_info);
