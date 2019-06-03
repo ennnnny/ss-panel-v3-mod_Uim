@@ -324,6 +324,7 @@ class XCat
                         $temp = explode('?', $node_info);
                         $temp[1] = $new_query;
                         $param[] = 'ssr://' . Tools::base64_url_encode(implode('?', $temp));
+                        $num++;
                     }
                 }
             }
