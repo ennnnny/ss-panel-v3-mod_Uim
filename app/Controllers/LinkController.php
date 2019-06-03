@@ -95,12 +95,14 @@ class LinkController extends BaseController
     {
         if ($mu==0||$mu==1) {
             $info = URL::getAllUrl($user, $mu, 0);
-            $ssr_info = file_get_contents(BASE_PATH . '/storage/ssr.txt');
-            if (!empty($ssr_info)){
-                $info = explode(PHP_EOL,$info);
-                $ssr_info = explode(PHP_EOL,$ssr_info);
-                $info = array_merge($info,$ssr_info);
-                $info = implode(PHP_EOL,array_filter($info));
+            if ($user->class >= 1) {
+                $ssr_info = file_get_contents(BASE_PATH . '/storage/ssr.txt');
+                if (!empty($ssr_info)) {
+                    $info = explode(PHP_EOL, $info);
+                    $ssr_info = explode(PHP_EOL, $ssr_info);
+                    $info = array_merge($info, $ssr_info);
+                    $info = implode(PHP_EOL, array_filter($info));
+                }
             }
             return Tools::base64_url_encode($info);
         } 
