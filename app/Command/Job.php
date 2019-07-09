@@ -481,7 +481,8 @@ class Job
                         $text = "管理员您好，系统发现节点 " . $node->name . " 掉线了，请您及时处理。";
                         $postdata = http_build_query(
                             array(
-                                'text' => Config::get('appName') . "-节点掉线了",
+//                                'text' => Config::get('appName') . "-节点掉线了",
+                                'text' => $node->name . "-节点掉线了",
                                 'desp' => $text
                             ));
                         $opts = array('http' =>
@@ -561,7 +562,8 @@ class Job
                         $text = "管理员您好，系统发现节点 " . $node->name . " 恢复上线了。";
                         $postdata = http_build_query(
                             array(
-                                'text' => Config::get('appName') . "-节点掉线了",
+//                                'text' => Config::get('appName') . "-节点上线了",
+                                'text' => $node->name . "-节点上线了",
                                 'desp' => $text
                             ));
                         $opts = array('http' =>
