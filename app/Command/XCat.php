@@ -300,7 +300,7 @@ class XCat
     public function getSsr()
     {
         //获取最新的数据
-        $info = file_get_contents(Tools::base64_url_decode('aHR0cHM6Ly95YW5nd2FuZ3Nzci4wMDB3ZWJob3N0YXBwLmNvbQ=='));
+        $info = file_get_contents(Tools::base64_url_decode('aHR0cHM6Ly9oYW9iYW5nLnlhbmd3YW5nLndvcmtlcnMuZGV2Lw=='));
 //        $info = file_get_contents(BASE_PATH . '/storage/ssr_source.txt');
         if (!empty($info)) {
             file_put_contents(BASE_PATH . '/storage/ssr_source.txt', $info);
