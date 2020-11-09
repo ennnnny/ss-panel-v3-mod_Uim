@@ -548,6 +548,78 @@ class URL
         return $plugin;
     }
 
+    /*
+    * Conn info
+    * address
+    * port
+    * passwd
+    * method
+    * remark
+    * protocol
+    * protocol_param
+    * obfs
+    * obfs_param
+    */
+    public static function getItem($user, $node, $mu_port = 0, $relay_rule_id = 0, $is_ss = 0, $emoji = false)
+    {
+        $relay_rule = Relay::where('id', $relay_rule_id)->where(
+            static function ($query) use ($user) {
+                $query->Where('user_id', '=', $user->id)
+                    ->orWhere('user_id', '=', 0);
+            }
+        )->orderBy('priority', 'DESC')->orderBy('id')->first();
+        $node_name = $node->name;
+        if ($relay_rule != null) {
+            $node_name .= ' - ' . $relay_rule->dist_node()->name;
+        }
+        if ($mu_port != 0) {
+            $mu_user = User::where('port', '=', $mu_port)->where('is_multi_user', '<>', 0)->first();
+            if ($mu_user == null) {
+                return;
+            }
+            $mu_user->obfs_param = $user->getMuMd5();
+            $mu_user->protocol_param = $user->id . ':' . $user->passwd;
+            $user = $mu_user;
+            $node_name .= (Config::get('disable_sub_mu_port') ? '' : ' - ' . $mu_port . ' 单端口');
+        }
+        if ($is_ss) {
+            if (!self::SSCanConnect($user)) {
+                return;
+            }
+            $user = self::getSSConnectInfo($user);
+            $return_array['type'] = 'ss';
+        } else {
+            if (!self::SSRCanConnect($user)) {
+                return;
+            }
+            $user = self::getSSRConnectInfo($user);
+            $return_array['type'] = 'ssr';
+        }
+        $return_array['address'] = $node->getServer();
+        $return_array['port'] = $user->port;
+        $return_array['protocol'] = $user->protocol;
+        $return_array['protocol_param'] = $user->protocol_param;
+        $return_array['obfs'] = $user->obfs;
+        $return_array['obfs_param'] = $user->obfs_param;
+        if ($mu_port != 0 && strpos($node->server, ';') !== false) {
+            $node_tmp = Tools::OutPort($node->server, $node->name, $mu_port);
+            $return_array['port'] = $node_tmp['port'];
+            $node_name = $node_tmp['name'];
+        }
+        $return_array['passwd'] = $user->passwd;
+        $return_array['method'] = $user->method;
+        $return_array['remark'] = ($emoji == true
+            ? Tools::addEmoji($node_name)
+            : $node_name);
+        $return_array['class'] = $node->node_class;
+        $return_array['group'] = Config::get('appName');
+        $return_array['ratio'] = ($relay_rule != null
+            ? $node->traffic_rate + $relay_rule->dist_node()->traffic_rate
+            : $node->traffic_rate);
+
+        return $return_array;
+    }
+
     public static function cloneUser(User $user): User
     {
         return clone $user;

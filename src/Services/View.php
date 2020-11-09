@@ -31,6 +31,11 @@ class View
         $smarty->setcachedir(BASE_PATH . '/storage/framework/smarty/cache/'); //设置缓存文件存放目录
         // add config
         $smarty->assign('config', Config::getPublicConfig());
+
+        require BASE_PATH."/config/.cool_config.php";
+        $smarty->assign('Cool_Config', $Cool_Config);
+        $smarty->assign('time', date("Y-m-d H:i:s",time()));
+
         $smarty->assign('user', $user);
         $smarty->assign('can_backtoadmin', $can_backtoadmin);
 
