@@ -223,38 +223,6 @@ class UserController extends BaseController
         }
 
     }
-    public static function GenerateRandomLink()
-    {
-        for ($i = 0; $i < 10; $i++) {
-            $token = Tools::genRandomChar(16);
-            $Elink = User::where("ssrlink", "=", $token)->first();
-            if ($Elink == null) {
-                return $token;
-            }
-        }
-
-        return "couldn't alloc token";
-    }
-
-    public static function GenerateSSRSubCode($adduserid, $without_mu)
-    {
-        $Elink = Link::where("type", "=", 11)->where("userid", "=", $adduserid)->where("geo", $without_mu)->first();
-        if ($Elink != null) {
-            return $Elink->token;
-        }//先查找有没有相同的数据下面再新创建
-        $NLink = new Link();
-        $NLink->type = 11;
-        $NLink->address = "";
-        $NLink->port = 0;
-        $NLink->ios = 0;
-        $NLink->geo = $without_mu;
-        $NLink->method = "";
-        $NLink->userid = $adduserid;
-        $NLink->token = UserController::GenerateRandomLink();
-        $NLink->save();
-
-        return $NLink->token;
-    }
 
     //单个用户创建(代理商)
     public function addUser($request, $response, $args)
@@ -340,7 +308,7 @@ class UserController extends BaseController
         $user->creta = 0;
         //用户注册成功之后才执行添加套餐的操作
         if ($user->save()) {
-            $ssr_sub_token = UserController::GenerateSSRSubCode($user->id,0);
+            $ssr_sub_token = LinkController::GenerateSSRSubCode($user->id,0);
             User::where('id', $user->id)->update(['ssrlink' => $ssr_sub_token]);
             $shopId = $request->getParam('shopId');
             $shop = Shop::where("id", $shopId)->where("status", 1)->first();

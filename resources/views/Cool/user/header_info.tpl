@@ -1,9 +1,9 @@
-	<meta charset="UTF-8" /> 
+	<meta charset="UTF-8" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    
+
     <!-- BEGIN: Vendor CSS-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="/theme/cool/assets/vendors/css/vendors.min.css">
@@ -145,8 +145,8 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
                             	<a class="dropdown-item" href="/user/profile"><i class="feather icon-user"></i> 我的账号</a>
-                            	<a class="dropdown-item" href="/user/code"><i class="feather icon-credit-card""></i> 我的背包</a>
-                            	<a class="dropdown-item" href="/user/invite"><i class="feather icon-paperclip"></i> 推荐计划</a>
+                            	<a class="dropdown-item" href="/user/code"><i class="feather icon-credit-card""></i> 我的钱包</a>
+                            	<a class="dropdown-item" href="/user/invite"><i class="feather icon-paperclip"></i> 邀请注册</a>
                             	{if $user->isAdmin()}
                             		<a class="dropdown-item" href="/admin"><i class="feather icon-message-square"></i> 管理中心</a>
                             	{/if}
@@ -168,9 +168,14 @@
                 <ul class="nav navbar-nav flex-row">
                     <li class="nav-item mr-auto"><a class="navbar-brand" href="/user">
                             <div class="brand-logo"></div>
-                            <h2 class="brand-text mb-0">Cool</h2>
+                            <h2 class="brand-text mb-0">{$config["appName"]}</h2>
                         </a></li>
-                    <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i class="feather icon-x d-block d-xl-none font-medium-4 primary toggle-icon"></i><i class="toggle-icon feather icon-disc font-medium-4 d-none d-xl-block collapse-toggle-icon primary" data-ticon="icon-disc"></i></a></li>
+                    <li class="nav-item nav-toggle">
+                        <a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse">
+                            <i class="feather icon-x d-block d-xl-none font-medium-4 primary toggle-icon"></i>
+                            <i class="toggle-icon feather icon-disc font-medium-4 d-none d-xl-block collapse-toggle-icon primary" data-ticon="icon-disc"></i>
+                        </a>
+                    </li>
                 </ul>
             </div>
             <!-- Horizontal menu content-->
@@ -180,7 +185,7 @@
 	                <li class="nav-item mr-1"><a href="/user/code"><i class="feather icon-credit-card"></i><span class="menu-title">钱包</span></a></li>
 	                <li class="nav-item mr-1"><a href="/user/shop"><i class="feather icon-shopping-cart"></i><span class="menu-title">商店</span></a></li>
 	                <li class="nav-item mr-1"><a href="/user/node"><i class="feather icon-server"></i><span class="menu-title">节点列表</span></a></li>
-	                
+
                     <li class="dropdown nav-item mr-1" data-menu="dropdown"><a class="dropdown-toggle nav-page" href="#" data-toggle="dropdown"><i class="feather icon-user"></i><span>我的账号</span></a>
                         <ul class="dropdown-menu">
 							<li data-menu><a class="dropdown-item" href="/user/profile"><i class="feather icon-user"></i><span class="menu-title">账号设置</span></a></li>

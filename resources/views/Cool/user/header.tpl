@@ -128,8 +128,8 @@
 	                            </a>
 	                            <div class="dropdown-menu dropdown-menu-right">
 	                            	<a class="dropdown-item" href="/user/profile"><i class="feather icon-user"></i> 我的账号</a>
-	                            	<a class="dropdown-item" href="/user/code"><i class="feather icon-credit-card""></i> 我的背包</a>
-	                            	<a class="dropdown-item" href="/user/invite"><i class="feather icon-paperclip"></i> 推荐计划</a>
+	                            	<a class="dropdown-item" href="/user/code"><i class="feather icon-credit-card""></i> 我的钱包</a>
+	                            	<a class="dropdown-item" href="/user/invite"><i class="feather icon-paperclip"></i> 邀请注册</a>
 	                            	{if $user->isAdmin()}
 	                            		<a class="dropdown-item" href="/admin"><i class="feather icon-message-square"></i> 管理中心</a>
 	                            	{/if}
@@ -151,9 +151,14 @@
 	            <ul class="nav navbar-nav flex-row">
 	                <li class="nav-item mr-auto"><a class="navbar-brand" href="/user">
 	                        <div class="brand-logo"></div>
-	                        <h2 class="brand-text mb-0">Cool</h2>
+	                        <h2 class="brand-text mb-0">{$config["appName"]}</h2>
 	                    </a></li>
-	                <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i class="icon-x d-block d-xl-none font-medium-4 primary toggle-icon feather icon-disc"></i><i class="toggle-icon icon-disc font-medium-4 d-none d-xl-block collapse-toggle-icon primary feather" data-ticon="icon-disc"></i></a></li>
+	                <li class="nav-item nav-toggle">
+                        <a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse">
+                            <i class="icon-x d-block d-xl-none font-medium-4 primary toggle-icon feather icon-disc"></i>
+                            <i class="toggle-icon icon-disc font-medium-4 d-none d-xl-block collapse-toggle-icon primary feather" data-ticon="icon-disc"></i>
+                        </a>
+                    </li>
 	            </ul>
 	        </div>
 	        <div class="shadow-bottom"></div>

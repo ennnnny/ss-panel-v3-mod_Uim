@@ -6,7 +6,7 @@
         <title>支付结果 &mdash; {$config["appName"]}</title>
         <!-- ico -->
         <link rel="shortcut icon" href="/favicon.ico" />
-      
+
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.8.2/css/all.min.css">
         <link rel="stylesheet" type="text/css" href="/theme/cool/assets/vendors/css/vendors.min.css">
         <link rel="stylesheet" type="text/css" href="/theme/cool/assets/css/components.css">
@@ -15,15 +15,15 @@
 	    <link rel="stylesheet" type="text/css" href="/theme/cool/assets/css/components.css">
 	    <link rel="stylesheet" type="text/css" href="/theme/cool/assets/css/cool.css">
 	    <link rel="stylesheet" type="text/css" href="/theme/cool/assets/css/notify.css">
-      
+
         {if $magic_config['enable_crisp'] == true && $magic_config['enable_crisp_outside'] == true}
         	{include file='crisp.tpl'}
         {/if}
-      
+
         {if $magic_config['enable_chatra'] == true && $magic_config['enable_crisp_outside'] == true}
         	{include file='chatra.tpl'}
         {/if}
-        
+
         <script>
             var isWeixin = function () {
             var ua = navigator.userAgent.toLowerCase();
@@ -36,7 +36,7 @@
     </head>
 
 	<!-- BEGIN: Body-->
-	
+
 	<body class="vertical-layout vertical-menu-modern 1-column  navbar-floating footer-static bg-full-screen-image  blank-page blank-page  pace-done" data-open="click" data-menu="vertical-menu-modern" data-col="1-column"><div class="pace  pace-inactive"><div class="pace-progress" data-progress-text="100%" data-progress="99" style="transform: translate3d(100%, 0px, 0px);">
 	  <div class="pace-progress-inner"></div>
 	</div>
@@ -64,37 +64,37 @@
 						                    setTimeout('window.location.reload()', 5000);
 						                	</script>
 						                {/if}
-										<a class="btn btn-primary btn-lg mt-2 waves-effect waves-light" href="/user/code"><trans oldtip="Back to Home" newtip="回到家" style="">前往我的背包 👉</trans></a>
+										<a class="btn btn-primary btn-lg mt-2 waves-effect waves-light" href="/user/code"><trans oldtip="Back to Home" newtip="回到家" style="">前往我的钱包 👉</trans></a>
 	                                </div>
 	                            </div>
 	                        </div>
 	                    </div>
 	                </section>
 	                <!-- maintenance end -->
-	
+
 	            </div>
 	        </div>
 	    </div>
 	    <!-- END: Content-->
-	
-	
+
+
 	    <!-- BEGIN: Vendor JS-->
 	    <script src="/theme/cool/assets/js/vendors.min.js"></script>
 	    <!-- BEGIN Vendor JS-->
-	
+
 	    <!-- BEGIN: Page Vendor JS-->
 	    <!-- END: Page Vendor JS-->
-	
+
 	    <!-- BEGIN: Theme JS-->
 	    <script src="/theme/cool/assets/js/core/app-menu.js"></script>
 	    <script src="/theme/cool/assets/js/core/app.js"></script>
 	    <script src="/theme/cool/assets/js/scripts/components.js"></script>
 	    <!-- END: Theme JS-->
-	
+
 	    <!-- BEGIN: Page JS-->
 	    <!-- END: Page JS-->
-	
-	
+
+
 	<!-- END: Body-->
 
 </body>

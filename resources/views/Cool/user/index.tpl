@@ -1,7 +1,7 @@
 <!DOCTYPE html>
   <html lang="zh-CN">
-   <head> 
-    <title>用户中心 — {$config["appName"]}</title> 
+   <head>
+    <title>用户中心 — {$config["appName"]}</title>
 
 	{include file='user/header.tpl'}
 
@@ -11,13 +11,13 @@
 		transition: all .15s ease;
 		box-shadow: 0 4px 6px rgba(50,50,93,.11),0 1px 3px rgba(0,0,0,.08);
 	}
-	
+
 	@media (max-width:575.98px) {
 		.nav-pills .nav-item {
 			margin-bottom: 1rem
 		}
 	}
-	
+
 	@media (max-width:767.98px) {
 		.nav-pills:not(.nav-pills-circle) .nav-item {
 			padding-right: 0
@@ -40,7 +40,7 @@
                 <!-- Dashboard Analytics Start -->
                 <section id="dashboard-analytics">
                     <div class="row">
-                        <div class="col-lg-6 col-md-12 col-sm-12">			  
+                        <div class="col-lg-6 col-md-12 col-sm-12">
                             <div class="card bg-analytics text-white">
                                 <div class="card-content">
                                     <div class="card-body text-center">
@@ -188,7 +188,7 @@
 															</li>
 														</ul>
 													</div>
-										
+
 													<div class="tab-content" id="myTabContent">
 														<div class="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
 															<p>
@@ -198,20 +198,32 @@
 															<button id="general_ss" class="copy-config btn btn-sm btn-outline-primary"  onclick=Copyconfig("/user/getUserAllURL?type=ss","#general_ss","")>全部 URL</button>
 															</p>
 															<p>
-															(2)&nbsp;[ SSR ][全站支持]:&nbsp;
+															(2)&nbsp;[ SSR ][{if (in_array("ssr",$Cool_Config['subscribe_type']))}全站支持{else}暂不支持{/if}]:&nbsp;
 									                        </p>
 									                        <p>
-															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo["ssr"]}&extend=1">订阅链接</button>
+															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo["ssr"]}">订阅链接</button>
 															<button id="general_ssr" class="copy-config btn btn-sm btn-outline-primary" onclick=Copyconfig("/user/getUserAllURL?type=ssr","#general_ssr","")>全部 URL</button>
 															</p>
 															<p>
-															(3)&nbsp;[ VMess ][全站支持]:&nbsp;
+															(3)&nbsp;[ VMess ][{if (in_array("v2ray",$Cool_Config['subscribe_type']))}全站支持{else}暂不支持{/if}]:&nbsp;
 									                        </p>
 									                        <p>
-															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['v2ray']}&extend=1">订阅链接</button>
+															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['v2ray']}">订阅链接</button>
 															<button id="general_v2ray" class="copy-config btn btn-sm btn-outline-primary" onclick=Copyconfig("/user/getUserAllURL?type=v2ray","#general_v2ray","")>全部 URL</button>
 															</p>
-														</div> 
+                                                            <p>
+                                                                (4)&nbsp;[ Trojan ][{if (in_array("trojan",$Cool_Config['subscribe_type']))}全站支持{else}暂不支持{/if}]:&nbsp;
+                                                            </p>
+                                                            <p>
+                                                                <button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo["trojan"]}">订阅链接</button>
+                                                            </p>
+                                                            <p>
+                                                                (5)&nbsp;[ Clash ][{if (in_array("clash",$Cool_Config['subscribe_type']))}全站支持{else}暂不支持{/if}]:&nbsp;
+                                                            </p>
+                                                            <p>
+                                                                <button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo["clash"]}">订阅链接</button>
+                                                            </p>
+														</div>
 														<div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
 															<p>
 															(1)&nbsp;SS - [ SS ][{if (in_array("ss",$Cool_Config['subscribe_type']))}全站支持使用方法{else}暂不支持{/if}]:&nbsp;
@@ -220,7 +232,7 @@
 															<a class="btn btn-sm btn-outline-primary" href="/doc/#/Windows/Shadowsocks" target="_blank">教程文档</a>
 															<button id="win_ss" class="copy-config btn btn-sm btn-outline-primary" onclick=Copyconfig("/user/getUserAllURL?type=ss","#win_ss","")>全部 URL</button>
 															</p>
-															
+
 															<p>
 															<p>
 															(2)&nbsp;SSTap[ SSR ]使用方法:&nbsp;
@@ -230,7 +242,7 @@
 															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['ssr']}&extend=1">复制订阅</button>
 															<button id="win_ssr" class="copy-config btn btn-sm btn-outline-primary" onclick=Copyconfig("/user/getUserAllURL?type=ssr","#win_ssr","")>全部 URL</button>
 															</p>
-															
+
 															<p>
 															(3)&nbsp;V2rayN[ VMess ]使用方法:&nbsp;
 															</p>
@@ -239,12 +251,12 @@
 															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['v2ray']}&extend=1">复制订阅</button>
 															<button id="win_ssr" class="copy-config btn btn-sm btn-outline-primary" onclick=Copyconfig("/user/getUserAllURL?type=v2ray","#general_v2ray","")>全部 URL</button>
 															</p>
-															
+
 														    <p>
 															(4)&nbsp;ClashR[ SS/SSR/VMess ]使用方法:&nbsp;
 															</p>
 															<p>
-															<a class="btn btn-sm btn-outline-primary" href="/doc/#/Windows/Clash-for-Windows" target="_blank">教程文档</a> 
+															<a class="btn btn-sm btn-outline-primary" href="/doc/#/Windows/Clash-for-Windows" target="_blank">教程文档</a>
 															<a class="btn btn-sm btn-outline-primary" href="{$subInfo['clashr']}" target="_blank">配置下载</a>
 															<a class="btn btn-sm btn-outline-primary" href="clash://install-config?url={urlencode($subInfo['clashr'])}">ClashR 一键导入</a>
 															</p>
@@ -260,7 +272,7 @@
 															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['surge_node']}">3.x 节点</button>
 															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['surge2']}">2.x 托管</button>
 															</p>
-															
+
 															<p>
 															(2)&nbsp;ShadowsocksX-NG[ SSR ]:&nbsp;
 															</p>
@@ -282,7 +294,7 @@
 														{if $display_ios_class >= 0}
 															{if $user->class >= $display_ios_class}
 															iOS账户(仅可用于登陆Apple ID):
-														
+
 															<div class="col-sm-6 input-group" style="padding:0">
 																<input type="text" class="form-control form-control-sm" name="input1"  value="{$ios_account}" readonly disabled />
 																<div class="input-group-append">
@@ -296,9 +308,9 @@
 																   <a class="copy-text btn btn-sm btn-primary text-white" data-clipboard-text="{$ios_password}">复制</a>
 															    </div>
 															 </div>
-									                   
+
 															{/if}
-														{/if}							
+														{/if}
 
 															<p>
 															(1)&nbsp;Quantumult[ SS/SSR/VMess ]:&nbsp;
@@ -308,9 +320,9 @@
 															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['quantumult_v2']}&extend=1">V2 订阅</button>
 															<button class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['ssr']}&extend=1">SSR 订阅</button>
 															<button id="" type="button" class="copy-config btn btn-sm btn-outline-primary" onclick=Copyconfig("/link/{$ssr_sub_token}?quantumult=2","#quan_sub","quantumult://settings?configuration=clipboard")>混合一键订阅</button>
-													
+
 															</p>
-															
+
 															<p>
 															(2)&nbsp;Shadowrocket[ SS/SSR/VMess ]:&nbsp;
 															</p>
@@ -321,7 +333,7 @@
 															</p>
 														</div>
 														<div class="tab-pane fade" id="tabs-icons-text-5" role="tabpanel" aria-labelledby="tabs-icons-text-5-tab">
-															
+
 															<p>
 															(1)&nbsp;SSR[ SSR ]使用方法:&nbsp;
 									                        </p>
@@ -329,7 +341,7 @@
 															<a class="btn btn-sm btn-outline-primary" href="/doc/#/Android/ShadowsocksR" target="_blank">教程文档</a>
 															<button type="button" class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['ssr']}&extend=1">复制订阅</button>
 															</p>
-															
+
 															<p>
 															(2)&nbsp;V2rayNG[ SS/VMess ]使用方法:&nbsp;
 									                        </p>
@@ -341,7 +353,7 @@
 															(3)&nbsp;ClashRA[ SS/SSR/VMess ]使用方法:&nbsp;
 															</p>
 															<p>
-															<a class="btn btn-sm btn-outline-primary" href="/doc/#/Android/ClashRA" target="_blank">教程文档</a> 
+															<a class="btn btn-sm btn-outline-primary" href="/doc/#/Android/ClashRA" target="_blank">教程文档</a>
 															<a class="btn btn-sm btn-outline-primary" href="{$subInfo['clashr']}" target="_blank">配置下载</a>
 															<button type="button" class="copy-text btn btn-sm btn-outline-primary" data-clipboard-text="{$subInfo['clashr']}">复制订阅</button>
 															</p>
@@ -355,7 +367,7 @@
                                 </div>
                             </div>
                         </div>
-                    
+
                         <div class="col-12 col-md-6 col-lg-6">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-end">
@@ -378,7 +390,7 @@
                 	                    	<a href="/doc" class="btn btn-quantumult round waves-effect waves-light"><i class="fas fa-book"></i>&nbsp;&nbsp;软件和教程&nbsp;</a>
                                         </div>
                                         <hr />
-                                        
+
                                         <div class="dropdown">
                                         {if (in_array("ssr",$Cool_Config['subscribe_type']))}
 	                                        <!-- SSR订阅 -->
@@ -390,7 +402,7 @@
 	                                        	</div>
 	                                        </div>
 	                                    {/if}
-	                                    
+
 	                                    {if (in_array("ss",$Cool_Config['subscribe_type'])) || (in_array("v2ray",$Cool_Config['subscribe_type']))}
 	                                        <!-- ClashX订阅 -->
 											<div class="btn-group mt-1">
@@ -401,7 +413,7 @@
 	                                        	</div>
 	                                        </div>
 	                                    {/if}
-	                                    
+
 	                                    {if (in_array("ss",$Cool_Config['subscribe_type'])) || (in_array("ssr",$Cool_Config['subscribe_type']))}
 	                                        <!-- ClashR订阅 -->
 											<div class="btn-group mt-1">
@@ -412,8 +424,8 @@
 	                                        	</div>
 	                                        </div>
 	                                    {/if}
-	                                   </div>   
-	                                   
+	                                   </div>
+
 	                                   <div class="dropdown">
 	                                        <!-- Shadowrocket订阅 -->
 	                                        <div class="btn-group mt-1">
@@ -423,7 +435,7 @@
 	                                              <button type="button" class="dropdown-item" href="##" onclick="importSublink('shadowrocket')">一键导入 Shadowrocket</button>
 	                                        	</div>
 	                                        </div>
-	                                        
+
 	                                        <!-- Quantumult订阅 -->
 	                                        <div class="btn-group mt-1">
 	                                        	<button type="button" class="btn btn-quantumult round dropdown-toggle waves-effect waves-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="cool-quantumult"></i>&nbsp;&nbsp;Quantumult 订阅</button>&nbsp;&nbsp;
@@ -435,7 +447,7 @@
 	                                              <button type="button" class="dropdown-item" href="##" onclick="importSublink('quantumult_v2')">一键导入 V2ray 节点订阅</button>
 	                                        	</div>
 	                                        </div>
-	                                        
+
 	                                        {if (in_array("v2ray",$Cool_Config['subscribe_type']))}
 	                                        <!-- V2ray订阅 -->
 											<div class="btn-group mt-1">
@@ -446,7 +458,7 @@
                                     </div>
                                 </div>
                             </div>
-            
+
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-end">
                                     <h4><i class="feather icon-pie-chart"></i> 流量使用情况</h4>
@@ -525,7 +537,7 @@
 	    }
 	  }
 	</script>
-	
+
 	<script>
 		$("#reset-link").click(function () {
 			swal('重置成功', "请变更或添加您的订阅链接！～～",'success');
