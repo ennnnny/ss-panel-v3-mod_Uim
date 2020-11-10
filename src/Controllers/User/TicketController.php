@@ -45,6 +45,7 @@ class TicketController extends UserController
         return $response->write(
             $this->view()
                 ->assign('tickets', $tickets)
+                ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
                 ->display('user/ticket.tpl')
         );
     }
@@ -58,6 +59,7 @@ class TicketController extends UserController
     {
         return $response->write(
             $this->view()
+                ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
                 ->display('user/ticket_create.tpl')
         );
     }
@@ -313,6 +315,7 @@ class TicketController extends UserController
             $this->view()
                 ->assign('ticketset', $ticketset)
                 ->assign('id', $id)
+                ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
                 ->display('user/ticket_view.tpl')
         );
     }

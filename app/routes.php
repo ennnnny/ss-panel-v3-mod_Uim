@@ -121,6 +121,12 @@ return function (SlimApp $app) {
         // Crypto Payment - BTC, ETH, EOS, BCH, LTC etch
         $this->post('/payment/bitpay/purchase', App\Services\BitPayment::class . ':purchase');
         $this->get('/payment/bitpay/return',    App\Services\BitPayment::class . ':returnHTML');
+
+        $this->get('/agent', App\Controllers\UserController::class . ':agent');//代理商入口
+        $this->post('/agentbuy', App\Controllers\UserController::class . ':agentbuy');//代理商续费
+        $this->post('/addUser', App\Controllers\UserController::class . ':addUser');//代理商添加用户
+        $this->delete('/agentdelete', App\Controllers\UserController::class . ':addDelete');//代理商删除用户
+        $this->get('/share-account',            App\Controllers\UserController::class . ':share_account');
     })->add(new Auth());
 
     $app->group('/payment', function () {
@@ -269,6 +275,10 @@ return function (SlimApp $app) {
         $this->get('/sys',                      App\Controllers\AdminController::class . ':sys');
         $this->get('/logout',                   App\Controllers\AdminController::class . ':logout');
         $this->post('/payback/ajax',            App\Controllers\AdminController::class . ':ajax_payback');
+
+        // stats
+        $this->get('/api/analytics/income', App\Controllers\AdminController::class . ':getIncome');
+        $this->get('/api/analytics/new-users', App\Controllers\AdminController::class . ':newUsers');
 
         // Subscribe Log Mange
         $this->get('/subscribe',                App\Controllers\Admin\SubscribeLogController::class . ':index');

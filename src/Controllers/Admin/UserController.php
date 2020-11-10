@@ -39,6 +39,7 @@ class UserController extends AdminController
             'remark'                => '备注',
             'email'                 => '邮箱',
             'money'                 => '金钱',
+            'is_agent'              => '代理商',
             'im_type'               => '联络方式类型',
             'im_value'              => '联络方式详情',
             'node_group'            => '群组',
@@ -347,6 +348,7 @@ class UserController extends AdminController
         $user->protocol         = $request->getParam('protocol');
         $user->protocol_param   = $request->getParam('protocol_param');
         $user->obfs             = $request->getParam('obfs');
+        $user->creta            = $request->getParam('creta');
         $user->obfs_param       = $request->getParam('obfs_param');
         $user->is_multi_user    = $request->getParam('is_multi_user');
         $user->transfer_enable  = Tools::toGB($request->getParam('transfer_enable'));
@@ -356,6 +358,7 @@ class UserController extends AdminController
         $user->node_connector   = $request->getParam('node_connector');
         $user->enable           = $request->getParam('enable');
         $user->is_admin         = $request->getParam('is_admin');
+        $user->is_agent         = $request->getParam('is_agent');
         $user->ga_enable        = $request->getParam('ga_enable');
         $user->node_group       = $request->getParam('group');
         $user->ref_by           = $request->getParam('ref_by');
@@ -522,6 +525,7 @@ class UserController extends AdminController
             $tempdata['remark']     = $user->remark;
             $tempdata['email']      = $user->email;
             $tempdata['money']      = $user->money;
+            $tempdata['is_agent'] = $user->is_agent;
             $tempdata['im_value']   = $user->im_value;
             switch ($user->im_type) {
                 case 1:

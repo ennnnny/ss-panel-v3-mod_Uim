@@ -2,18 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Services\{
-    Auth,
-    Mail,
-    Config,
-    Payment,
-    BitPayment,
-    Gateway\ChenPay,
-};
-use App\Models\{
-    Ip,
+use App\Services\{Auth, CoolConfig, Mail, Config, Payment, BitPayment, Gateway\ChenPay};
+use App\Models\{Ip,
     Ann,
     Code,
+    Link,
     Node,
     Shop,
     User,
@@ -31,9 +24,8 @@ use App\Models\{
     DetectRule,
     TrafficLog,
     InviteCode,
-    UserSubscribeLog
-};
-use App\Utils\{
+    UserSubscribeLog};
+use App\Utils\{Check,
     GA,
     Pay,
     URL,
@@ -46,8 +38,7 @@ use App\Utils\{
     Telegram,
     ClientProfiles,
     DatatablesHelper,
-    TelegramSessionManager
-};
+    TelegramSessionManager};
 use voku\helper\AntiXSS;
 use Exception;
 
@@ -76,6 +67,8 @@ class UserController extends BaseController
 
         $Ann = Ann::orderBy('date', 'desc')->first();
 
+        $class_left_days = floor((strtotime($this->user->class_expire)-time())/86400)+1;
+
         if ($_ENV['subscribe_client_url'] != '') {
             $getClient = new Token();
             for ($i = 0; $i < 10; $i++) {
@@ -95,6 +88,7 @@ class UserController extends BaseController
         }
 
         return $this->view()
+            ->assign('class_left_days', $class_left_days)
             ->assign('ssr_sub_token', $ssr_sub_token)
             ->assign('display_ios_class', $_ENV['display_ios_class'])
             ->assign('display_ios_topup', $_ENV['display_ios_topup'])
@@ -115,7 +109,9 @@ class UserController extends BaseController
     {
         $Speedtest = Speedtest::where('datetime', '>', time() - $_ENV['Speedtest_duration'] * 3600)->orderBy('datetime', 'desc')->get();
 
-        return $this->view()->assign('speedtest', $Speedtest)->assign('hour', $_ENV['Speedtest_duration'])->display('user/lookingglass.tpl');
+        return $this->view()->assign('speedtest', $Speedtest)->assign('hour', $_ENV['Speedtest_duration'])
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/lookingglass.tpl');
     }
 
     public function code($request, $response, $args)
@@ -123,7 +119,227 @@ class UserController extends BaseController
         $pageNum = $request->getQueryParams()['page'] ?? 1;
         $codes = Code::where('type', '<>', '-2')->where('userid', '=', $this->user->id)->orderBy('id', 'desc')->paginate(15, ['*'], 'page', $pageNum);
         $codes->setPath('/user/code');
-        return $this->view()->assign('codes', $codes)->assign('pmw', Payment::purchaseHTML())->assign('bitpay', BitPayment::purchaseHTML())->display('user/code.tpl');
+
+        $bought_pageNum = 1;
+        if (isset($request->getQueryParams()["bought"])) {
+            $bought_pageNum = $request->getQueryParams()["bought"];
+        }
+        $shops = Bought::where("userid", $this->user->id)->orderBy("id", "desc")->paginate(5, ['*'], 'bought', $bought_pageNum);
+        $shops->setPath('/user/code');
+
+        return $this->view()->assign('codes', $codes)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->assign('shops', $shops)
+            ->assign('pmw', Payment::purchaseHTML())
+            ->assign('bitpay', BitPayment::purchaseHTML())
+            ->display('user/code.tpl');
+    }
+
+    public function agent($request, $response, $args)
+    {
+        $pageNum = 1;
+        if (isset($request->getQueryParams()["page"])) {
+            $pageNum = $request->getQueryParams()["page"];
+        }
+
+        $logs = Bought::where("p_id", $this->user->id)->get();
+        $agent_logs = [];
+        foreach ($logs as $log) {
+            $agent_logs[$log->userid] = ($agent_logs[$log->userid] ?? 0) + $log->price;
+        }
+
+        $agents = User::where("agent_id", $this->user->id)->orderBy("id", "asc")->paginate(10, ['*'], 'page', $pageNum);
+        $agents->setPath('/user/agent');
+
+        $Shops = Shop::where("status", 1)->orderBy("id", "asc")->get();
+        return $this->view()
+            ->assign('shop_name', $Shops)
+            ->assign('agents', $agents)
+            ->assign('agent_logs', $agent_logs)
+            ->assign('subUrl', Config::get('subUrl'))
+            ->assign('creta', (100 - $this->user->creta))
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/agent.tpl');
+    }
+
+    public function agentbuy($request, $response, $args)
+    {
+        $userId = $request->getParam('userid');
+        $shopId = $request->getParam('shopid');
+        $credit = $this->user->creta;
+        $shop = Shop::where("id", $shopId)->where("status", 1)->first();
+
+        if ($shop == null) {
+            $res['ret'] = 0;
+            $res['msg'] = "请选择套餐！";
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        $price = $shop->price * ((100 - $credit) / 100);
+        $user = $this->user;
+
+        if (bccomp($user->money , $price,2)==-1) {
+            $res['ret'] = 0;
+            $res['msg'] = '喵喵喵~ 当前余额不足，总价为' . $price . '元。请充值~！';
+            return $response->getBody()->write(json_encode($res));
+        } else {
+            $user->money = bcsub($user->money , $price,2);
+            $user->save();
+        }
+
+        $userr = User::where("id", $userId)->first();
+        if ($user->save()) {
+            $shop->buy($userr);
+
+            $bought = new Bought();
+            $bought->userid = $userId;
+            $bought->shopid = $shop->id;
+            $bought->datetime = time();
+            $bought->renew = 0;
+            $bought->price = $price;
+            $bought->p_id = $this->user->id;
+            $bought->save();
+
+            $res['ret'] = 1;
+            $res['msg'] = "购买成功";
+            return $response->getBody()->write(json_encode($res));
+        }
+
+    }
+    public function addDelete($request, $response, $args)
+    {
+        $id = $request->getParam('deleteid');
+        $user = User::where('id', $id)->where('money', '<=', 0)->where('is_agent', '<>', 1)->where('is_admin', '<>', 1)->first();
+
+        if ($user != null) {
+            $user->kill_user();
+            $res['ret'] = 1;
+            $res['msg'] = "删除成功!";
+            return $response->getBody()->write(json_encode($res));
+        } else {
+            $res['ret'] = 0;
+            $res['msg'] = "删除失败,用户不存在";
+            return $response->getBody()->write(json_encode($res));
+        }
+
+    }
+
+    //单个用户创建(代理商)
+    public function addUser($request, $response, $args)
+    {
+        $userName = $request->getParam('userName');
+        $email = $request->getParam('email');
+        $shopId = $request->getParam('shopId');
+        $issend = $request->getParam('issend');
+        $shop = Shop::where("id", $shopId)->where("status", 1)->first();
+        $credit = $this->user->creta;
+        $agentid = $this->user->id;
+
+        if (!Check::isEmailLegal($email)) {
+            $res['ret'] = 0;
+            $res['msg'] = "邮箱无效！";
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        $DbUser = User::where('email', '=', $email)->first();
+
+        if ($DbUser != null) {
+            $result['ret'] = 0;
+            $result['msg'] = "此邮箱已经注册";
+            return $response->getBody()->write(json_encode($result));
+        }
+
+        $price = $shop->price * ((100 - $credit) / 100);
+        $user = $this->user;
+        if (bccomp($user->money , $price,2)==-1) {
+            $res['ret'] = 0;
+            $res['msg'] = '喵喵喵~ 当前余额不足，总价为' . $price . '元。</br><a href="/user/code">点击进入充值界面</a>';
+            return $response->getBody()->write(json_encode($res));
+        }
+        $user->money = bcsub($user->money , $price,2);
+        $user->save();
+
+        $user = new User();
+//        $pass = Tools::genRandomChar();
+        $user->user_name = $email;
+        $user->email = $email;
+        $user->pass = Hash::passwordHash($email);
+        $user->passwd = Tools::genRandomChar(6);
+        $user->port = Tools::getAvPort();
+        $user->t = 0;
+        $user->u = 0;
+        $user->d = 0;
+        $user->method = Config::getconfig('Register.string.defaultMethod');
+        $user->protocol = Config::getconfig('Register.string.defaultProtocol');
+        $user->protocol_param = Config::getconfig('Register.string.defaultProtocol_param');
+        $user->obfs = Config::getconfig('Register.string.defaultObfs');
+        $user->obfs_param = Config::getconfig('Register.string.defaultObfs_param');
+        $user->forbidden_ip = $_ENV['reg_forbidden_ip'];
+        $user->forbidden_port = $_ENV['reg_forbidden_port'];
+        $user->im_type = 2;
+        $user->im_value = $email;
+        $user->transfer_enable = Tools::toGB((int)Config::getconfig('Register.string.defaultTraffic'));
+        $user->invite_num = (int)Config::getconfig('Register.string.defaultInviteNum');
+        $user->auto_reset_day = $_ENV['reg_auto_reset_day'];
+        $user->auto_reset_bandwidth = $_ENV['reg_auto_reset_bandwidth'];
+        $user->money = 0;
+        $user->class_expire = date('Y-m-d H:i:s', time() + (int)Config::getconfig('Register.string.defaultClass_expire') * 3600);
+        $user->class = (int)Config::getconfig('Register.string.defaultClass');
+        $user->node_connector = (int)Config::getconfig('Register.string.defaultConn');
+        $user->node_speedlimit = (int)Config::getconfig('Register.string.defaultSpeedlimit');
+        $user->expire_in = date('Y-m-d H:i:s', time() + (int)Config::getconfig('Register.string.defaultExpire_in') * 86400);
+        $user->reg_date = date('Y-m-d H:i:s');
+        $user->reg_ip = $_SERVER['REMOTE_ADDR'];
+        $user->plan = 'A';
+        $user->theme = $_ENV['theme'];
+
+        $groups = explode(',', $_ENV['random_group']);
+
+        $user->node_group = $groups[array_rand($groups)];
+
+        $ga = new GA();
+        $secret = $ga->createSecret();
+
+        $user->ga_token = $secret;
+        $user->ga_enable = 0;
+
+        $user->is_agent = 0;
+        $user->agent_id = $agentid;
+        $user->creta = 0;
+        //用户注册成功之后才执行添加套餐的操作
+        if ($user->save()) {
+            $ssr_sub_token = LinkController::GenerateSSRSubCode($user->id,0);
+            User::where('id', $user->id)->update(['ssrlink' => $ssr_sub_token]);
+            $shopId = $request->getParam('shopId');
+            $shop = Shop::where("id", $shopId)->where("status", 1)->first();
+            if ($shop != null) {
+                $shop->buy($user);
+
+                $bought = new Bought();
+                $bought->userid = $user->id;
+                $bought->shopid = $shop->id;
+                $bought->datetime = time();
+                $bought->renew = 0;
+                $bought->price = $price;
+                $bought->p_id = $this->user->id;
+                $bought->save();
+            }
+            $addsum = User::where('id', $user->id)->get();
+            if ($issend == '1') {
+                $subject = Config::get('appName') . '-注册通知';
+                $to = $user->email;
+                $text = '您好, 恭喜您成功注册本站!';
+                try {
+                    Mail::send($to, $subject, 'news/warn.tpl', [
+                        'user' => $user, 'text' => $text
+                    ], [
+                    ]);
+                } catch (Exception $e) {
+                    echo $e->getMessage();
+                }
+            }
+        }
+        return $response->getBody()->write(json_encode($addsum));
     }
 
     public function orderDelete($request, $response, $args)
@@ -145,7 +361,11 @@ class UserController extends BaseController
             }
         )->where('isused', 1)->orderBy('id', 'desc')->paginate(15, ['*'], 'page', $pageNum);
         $codes->setPath('/user/donate');
-        return $this->view()->assign('codes', $codes)->assign('total_in', Code::where('isused', 1)->where('type', -1)->sum('number'))->assign('total_out', Code::where('isused', 1)->where('type', -2)->sum('number'))->display('user/donate.tpl');
+        return $this->view()->assign('codes', $codes)
+            ->assign('total_in', Code::where('isused', 1)->where('type', -1)->sum('number'))
+            ->assign('total_out', Code::where('isused', 1)->where('type', -2)->sum('number'))
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/donate.tpl');
     }
 
     public function isHTTPS()
@@ -413,7 +633,7 @@ class UserController extends BaseController
 
         $totallogin = LoginIp::where('userid', '=', $this->user->id)->where('type', '=', 0)->orderBy('datetime', 'desc')->take(10)->get();
 
-        $userloginip = array();
+        $userloginip = $user_login_ip = [];
 
         foreach ($totallogin as $single) {
             //if(isset($useripcount[$single->userid]))
@@ -422,6 +642,8 @@ class UserController extends BaseController
                     //$useripcount[$single->userid]=$useripcount[$single->userid]+1;
                     $location = $iplocation->getlocation($single->ip);
                     $userloginip[$single->ip] = iconv('gbk', 'utf-8//IGNORE', $location['country'] . $location['area']);
+                    $user_login_ip[$single->ip]['location'] = iconv('gbk', 'utf-8//IGNORE', $location['country'] . $location['area']);
+                    $user_login_ip[$single->ip]['logintime'] = date("Y-m-d H:i:s", $single->datetime);
                 }
             }
         }
@@ -454,7 +676,21 @@ class UserController extends BaseController
             return $response->getBody()->write(json_encode($res));
         };
 
-        return $this->view()->assign('boughts', $boughts)->assign('userip', $userip)->assign('userloginip', $userloginip)->assign('paybacks', $paybacks)->display('user/profile.tpl');
+        $BIP = BlockIp::where("ip", $_SERVER["REMOTE_ADDR"])->first();
+        if ($BIP == null) {
+            $Block = $_SERVER["REMOTE_ADDR"] . " 没有被封";
+        } else {
+            $Block = $_SERVER["REMOTE_ADDR"] . " 已被封";
+        }
+
+        return $this->view()->assign('boughts', $boughts)
+            ->assign('Block', $Block)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->assign('userip', $userip)
+            ->assign('userloginip', $userloginip)
+            ->assign('user_login_ip', $user_login_ip)
+            ->assign('paybacks', $paybacks)
+            ->display('user/profile.tpl');
     }
 
     public function announcement($request, $response, $args)
@@ -465,14 +701,19 @@ class UserController extends BaseController
             $res['Anns']      = $Anns;
             $res['ret']         = 1;
             return $this->echoJson($response, $res);
-        };
+        }
 
-        return $this->view()->assign('anns', $Anns)->display('user/announcement.tpl');
+        return $this->view()
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->assign('anns', $Anns)
+            ->display('user/announcement.tpl');
     }
 
     public function tutorial($request, $response, $args)
     {
-        return $this->view()->display('user/tutorial.tpl');
+        return $this->view()
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/tutorial.tpl');
     }
 
     public function edit($request, $response, $args)
@@ -494,6 +735,7 @@ class UserController extends BaseController
 
         return $this->view()
             ->assign('user', $this->user)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
             ->assign('themes', $themes)
             ->assign('isBlock', $isBlock)
             ->assign('Block', $Block)
@@ -519,7 +761,18 @@ class UserController extends BaseController
         }
         $paybacks->setPath('/user/invite');
 
-        return $this->view()->assign('code', $code)->assign('paybacks', $paybacks)->assign('paybacks_sum', $paybacks_sum)->display('user/invite.tpl');
+        $invite_user = User::where('ref_by', $this->user->id)->orderBy('id', 'desc')->paginate(15, ['*'], 'page', $pageNum);
+
+        $ref_money = $this->user->ref_money;
+
+        $invite_user->setPath('/user/invite');
+
+        return $this->view()->assign('code', $code)->assign('paybacks', $paybacks)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->assign('paybacks_sum', $paybacks_sum)
+            ->assign('ref_money', $ref_money)
+            ->assign('invite_user', $invite_user)
+            ->display('user/invite.tpl');
     }
 
     public function buyInvite($request, $response, $args)
@@ -599,7 +852,7 @@ class UserController extends BaseController
 
     public function sys()
     {
-        return $this->view()->assign('ana', '')->display('user/sys.tpl');
+        return $this->view()->assign('ana', '')->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)->display('user/sys.tpl');
     }
 
     public function updatePassword($request, $response, $args)
@@ -668,8 +921,51 @@ class UserController extends BaseController
 
     public function shop($request, $response, $args)
     {
+        $shop_price1 = CoolConfig::get("shops_price")['plan_1'];
+        $shop_price2 = CoolConfig::get("shops_price")['plan_2'];
+        $shop_price3 = CoolConfig::get("shops_price")['plan_3'];
+        $shop_price4 = CoolConfig::get("shops_price")['plan_4'];
+
+        $shops_p_c1 = Shop::where(
+            static function ($query) use ($shop_price1) {
+                $query->Where('id', '=', $shop_price1['p1_price_1'])
+                    ->orwhere('id', '=', $shop_price1['p1_price_2'])
+                    ->orwhere('id', '=', $shop_price1['p1_price_3']);
+            }
+        )->where('status', '=', 1)->orderBy('price', 'asc')->get();
+
+        $shops_p_c2 = Shop::where(
+            static function ($query) use ($shop_price2) {
+                $query->Where('id', '=', $shop_price2['p2_price_1'])
+                    ->orWhere('id', '=', $shop_price2['p2_price_2'])
+                    ->orWhere('id', '=', $shop_price2['p2_price_3']);
+            })->where('status', '=', 1)->orderBy('price', 'asc')->get();
+
+        $shops_p_c3 = Shop::where(
+            static function ($query) use ($shop_price3) {
+                $query->Where('id', '=', $shop_price3['p3_price_1'])
+                    ->orwhere('id', '=', $shop_price3['p3_price_2'])
+                    ->orwhere('id', '=', $shop_price3['p3_price_3']);
+            }
+        )->where('status', '=', 1)->orderBy('price', 'asc')->get();
+
+        $shops_p_c4 = Shop::where(
+            static function ($query) use ($shop_price4) {
+                $query->Where('id', '=', $shop_price4['p4_price_1'])
+                    ->orwhere('id', '=', $shop_price4['p4_price_2'])
+                    ->orwhere('id', '=', $shop_price4['p4_price_3']);
+            }
+        )->where('status', '=', 1)->orderBy('price', 'asc')->get();
+
         $shops = Shop::where('status', 1)->orderBy('name')->get();
-        return $this->view()->assign('shops', $shops)->display('user/shop.tpl');
+        return $this->view()
+            ->assign('shops', $shops)
+            ->assign('shops_p_c1', $shops_p_c1)
+            ->assign('shops_p_c2', $shops_p_c2)
+            ->assign('shops_p_c3', $shops_p_c3)
+            ->assign('shops_p_c4', $shops_p_c4)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/shop.tpl');
     }
 
     public function CouponCheck($request, $response, $args)
@@ -924,7 +1220,9 @@ class UserController extends BaseController
             $res['shops'] = $shops;
             return $response->getBody()->write(json_encode($res));
         };
-        return $this->view()->assign('shops', $shops)->display('user/bought.tpl');
+        return $this->view()->assign('shops', $shops)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/bought.tpl');
     }
 
     public function deleteBoughtGet($request, $response, $args)
@@ -1248,7 +1546,9 @@ class UserController extends BaseController
 
     public function kill($request, $response, $args)
     {
-        return $this->view()->display('user/kill.tpl');
+        return $this->view()
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/kill.tpl');
     }
 
     public function handleKill($request, $response, $args)
@@ -1293,7 +1593,9 @@ class UserController extends BaseController
             return $this->echoJson($response, $res);
         }
 
-        return $this->view()->assign('logs', $traffic)->display('user/trafficlog.tpl');
+        return $this->view()->assign('logs', $traffic)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/trafficlog.tpl');
     }
 
     public function detect_index($request, $response, $args)
@@ -1308,7 +1610,9 @@ class UserController extends BaseController
         }
 
         $logs->setPath('/user/detect');
-        return $this->view()->assign('rules', $logs)->display('user/detect_index.tpl');
+        return $this->view()->assign('rules', $logs)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/detect_index.tpl');
     }
 
     public function detect_log($request, $response, $args)
@@ -1331,12 +1635,16 @@ class UserController extends BaseController
         }
 
         $logs->setPath('/user/detect/log');
-        return $this->view()->assign('logs', $logs)->display('user/detect_log.tpl');
+        return $this->view()->assign('logs', $logs)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/detect_log.tpl');
     }
 
     public function disable($request, $response, $args)
     {
-        return $this->view()->display('user/disable.tpl');
+        return $this->view()
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->display('user/disable.tpl');
     }
 
     public function telegram_reset($request, $response, $args)
@@ -1455,7 +1763,10 @@ class UserController extends BaseController
             return $this->echoJson($response, $res);
         }
 
-        return $this->view()->assign('logs', $logs)->assign('iplocation', $iplocation)->fetch('user/subscribe_log.tpl');
+        return $this->view()->assign('logs', $logs)
+            ->assign('iplocation', $iplocation)
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->fetch('user/subscribe_log.tpl');
     }
 
     /**
@@ -1532,5 +1843,13 @@ class UserController extends BaseController
         }
         $this->user = $user;
         return $this->getPcClient($request, $response, $args);
+    }
+
+    public function share_account($request, $response, $args)
+    {
+        return $this->view()
+            ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
+            ->assign('display_ios_topup', Config::get('display_ios_topup'))
+            ->assign('time', date("Y-m-d H:i:s",time()))->display('user/share-account.tpl');
     }
 }
