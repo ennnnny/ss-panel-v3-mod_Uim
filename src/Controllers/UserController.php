@@ -321,7 +321,7 @@ class UserController extends BaseController
         $user->creta = 0;
         //用户注册成功之后才执行添加套餐的操作
         if ($user->save()) {
-            $ssr_sub_token = LinkController::GenerateSSRSubCode($user->id,0);
+            $ssr_sub_token = LinkController::GenerateSSRSubCode($user->id);
             User::where('id', $user->id)->update(['ssrlink' => $ssr_sub_token]);
             $shopId = $request->getParam('shopId');
             $shop = Shop::where("id", $shopId)->where("status", 1)->first();
