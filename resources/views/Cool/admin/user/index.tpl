@@ -143,6 +143,7 @@
                 {"data": "remark"},
                 {"data": "email"},
                 {"data": "money"},
+                {"data": "is_agent"},
                 {"data": "im_type"},
                 {"data": "im_value"},
                 {"data": "node_group"},

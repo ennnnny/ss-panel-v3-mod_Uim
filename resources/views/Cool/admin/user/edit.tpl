@@ -35,6 +35,16 @@
                                     </label>
                                 </div>
                             </div>
+
+                            <div class="form-group form-group-label">
+                                <div class="checkbox switch">
+                                    <label for="is_agent">
+                                        <input {if $edit_user->is_agent==1}checked{/if} class="access-hide"
+                                               id="is_agent" type="checkbox"><span class="switch-toggle"></span>是否代理
+                                    </label>
+                                </div>
+                            </div>
+
                             <div class="form-group form-group-label">
                                 <div class="checkbox switch">
                                     <label for="enable">
@@ -51,6 +61,13 @@
                                     </label>
                                 </div>
                             </div>
+
+                            <div class="form-group form-group-label">
+                                <label class="floating-label" for="creta">代理商折扣（90代表1折，10代表9折）</label>
+                                <input class="form-control maxwidth-edit" id="creta" type="text"
+                                       value="{$edit_user->creta}">
+                            </div>
+
                             <div class="form-group form-group-label">
                                 <label class="floating-label" for="money">金钱</label>
                                 <input class="form-control maxwidth-edit" id="money" type="text"
@@ -288,6 +305,13 @@
             } else {
                 var is_admin = 0;
             }
+
+            if (document.getElementById('is_agent').checked) {
+                var is_agent = 1;
+            } else {
+                var is_agent = 0;
+            }
+
             if (document.getElementById('enable').checked) {
                 var enable = 1;
             } else {
@@ -317,8 +341,10 @@
                     method: $$getValue('method'),
                     remark: $$getValue('remark'),
                     money: $$getValue('money'),
+                    creta: $$getValue('creta'),
                     enable,
                     is_admin,
+                    is_agent,
                     ga_enable,
                     ban_time: $$getValue('ban_time'),
                     ref_by: $$getValue('ref_by'),
