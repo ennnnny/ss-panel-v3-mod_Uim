@@ -160,15 +160,15 @@ class Job extends Command
                     $user->d = 0;
                     $user->last_day_t = 0;
                     $user->save();
-                    $user->sendMail(
-                        $_ENV['appName'] . '-您的流量被重置了',
-                        'news/warn.tpl',
-                        [
-                            'text' => '您好，根据您所订购的订单 ID:' . $bought->id . '，流量已经被重置为' . $shop->reset_value() . 'GB'
-                        ],
-                        [],
-                        $_ENV['email_queue']
-                    );
+//                    $user->sendMail(
+//                        $_ENV['appName'] . '-您的流量被重置了',
+//                        'news/warn.tpl',
+//                        [
+//                            'text' => '您好，根据您所订购的订单 ID:' . $bought->id . '，流量已经被重置为' . $shop->reset_value() . 'GB'
+//                        ],
+//                        [],
+//                        $_ENV['email_queue']
+//                    );
                 }
             }
         }
@@ -187,15 +187,15 @@ class Job extends Command
                 $user->last_day_t = 0;
                 $user->transfer_enable = $user->auto_reset_bandwidth * 1024 * 1024 * 1024;
                 $user->save();
-                $user->sendMail(
-                    $_ENV['appName'] . '-您的流量被重置了',
-                    'news/warn.tpl',
-                    [
-                        'text' => '您好，根据管理员的设置，流量已经被重置为' . $user->auto_reset_bandwidth . 'GB'
-                    ],
-                    [],
-                    $_ENV['email_queue']
-                );
+//                $user->sendMail(
+//                    $_ENV['appName'] . '-您的流量被重置了',
+//                    'news/warn.tpl',
+//                    [
+//                        'text' => '您好，根据管理员的设置，流量已经被重置为' . $user->auto_reset_bandwidth . 'GB'
+//                    ],
+//                    [],
+//                    $_ENV['email_queue']
+//                );
             }
         }
 

@@ -151,7 +151,7 @@
                 {if $node['class'] == 1}
 	               <div class="col-12 col-sm-12 col-lg-6">
 
-	                {if $node['mu_only'] != 1 && ($node['sort'] != 11 || $node['sort']!=12)}
+	                {if $node['mu_only'] != 1 && $node['sort'] != 11 && $node['sort']!=12}
 	                    <div class="card-node" {if $user->class >= 1}onclick="urlChange('{$node['id']}',0,{if $relay_rule != null}{$relay_rule->id}{else}0{/if})" {else}onclick="UserClassinsufficient()"{/if}>
 
 	                {elseif $node['sort'] == 11}
@@ -224,7 +224,7 @@
                 {if $node['class'] == 2}
 	               <div class="col-12 col-sm-12 col-lg-6">
 
-	                {if $node['mu_only'] != 1 && ($node['sort'] != 11 || $node['sort']!=12)}
+	                {if $node['mu_only'] != 1 && $node['sort'] != 11 && $node['sort']!=12}
 	                    <div class="card-node" {if $user->class >= 2}onclick="urlChange('{$node['id']}',0,{if $relay_rule != null}{$relay_rule->id}{else}0{/if})" {else}onclick="UserClassinsufficient()"{/if}>
 
 	                {elseif $node['sort'] == 11}
@@ -296,7 +296,7 @@
                 {if $node['class'] == 3}
 	               <div class="col-12 col-sm-12 col-lg-6">
 
-	                {if $node['mu_only'] != 1 && ($node['sort'] != 11 || $node['sort']!=12)}
+	                {if $node['mu_only'] != 1 && $node['sort'] != 11 && $node['sort']!=12}
 	                    <div class="card-node" {if $user->class >= 3}onclick="urlChange('{$node['id']}',0,{if $relay_rule != null}{$relay_rule->id}{else}0{/if})" {else}onclick="UserClassinsufficient()"{/if}>
 
 	                {elseif $node['sort'] == 11}
