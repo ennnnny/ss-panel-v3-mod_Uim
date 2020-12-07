@@ -163,6 +163,9 @@ class UserController extends BaseController
 
         $agents = User::where("agent_id", $this->user->id)->orderBy("id", "asc")->paginate(10, ['*'], 'page', $pageNum);
         $agents->setPath('/user/agent');
+        foreach ($agents as $agent) {
+            $agent_logs[$agent->id] = $agent_logs[$agent->id] ?? 0;
+        }
 
         $Shops = Shop::where("status", 1)->orderBy("id", "asc")->get();
         return $this->view()
@@ -173,6 +176,63 @@ class UserController extends BaseController
             ->assign('creta', (100 - $this->user->creta))
             ->assign('class_left_days', floor((strtotime($this->user->class_expire)-time())/86400)+1)
             ->display('user/agent.tpl');
+    }
+
+    public function agentAllBuy($request, $response)
+    {
+        $current_user = $this->user;
+        $userId = $request->getParam('userid');
+        $user_ids = explode(',', $userId);
+        if (count($user_ids) <= 0) {
+            $res['ret'] = 0;
+            $res['msg'] = "请选择人员！";
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        $user_num = User::whereIn("id", $user_ids)->where('agent_id', $current_user->id)->count();
+        if ($user_num != count($user_ids)) {
+            $res['ret'] = 0;
+            $res['msg'] = "人员数据异常，请重新选择！";
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        $shopId = $request->getParam('shopid');
+        $credit = $current_user->creta;
+        $shop = Shop::where("id", $shopId)->where("status", 1)->first();
+
+        if ($shop == null) {
+            $res['ret'] = 0;
+            $res['msg'] = "请选择套餐！";
+            return $response->getBody()->write(json_encode($res));
+        }
+        $price = $shop->price * ((100 - $credit) / 100);
+        $all_price = $user_num * $price;
+        if (bccomp($current_user->money , $all_price,2)==-1) {
+            $res['ret'] = 0;
+            $res['msg'] = '喵喵喵~ 当前余额不足，总价为' . $all_price . '元。请充值~！';
+            return $response->getBody()->write(json_encode($res));
+        } else {
+            $current_user->money = bcsub($current_user->money , $all_price,2);
+            $current_user->save();
+        }
+
+        $users = User::whereIn("id", $user_ids)->where('agent_id', $current_user->id)->get();
+        foreach ($users as $user) {
+            $shop->buy($user);
+
+            $bought = new Bought();
+            $bought->userid = $user->id;
+            $bought->shopid = $shop->id;
+            $bought->datetime = time();
+            $bought->renew = 0;
+            $bought->price = $price;
+            $bought->p_id = $this->user->id;
+            $bought->save();
+        }
+
+        $res['ret'] = 1;
+        $res['msg'] = "购买成功";
+        return $response->getBody()->write(json_encode($res));
     }
 
     public function agentbuy($request, $response, $args)

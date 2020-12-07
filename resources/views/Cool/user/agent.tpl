@@ -55,23 +55,32 @@
 					     <div class="card-header">
 					      <h4 class="card-title">客户记录</h4>
 					     </div>
+                            <div class="panel-body">
+                                <div class="list-op" id="list_op">
+                                    <button type="button" class="btn btn-default btn-sm">
+                                        <a class="btn btn-danger" href="javascript:void(0);" onClick="buyAll()">批量续费</a>
+                                    </button>
+                                </div>
+                            </div>
 					     <div class="card-content">
 					      <div class="card-body">
 					       <div class="table-responsive">
-					        <table class="table mb-0">
+					        <table class="table mb-0" id="test_table">
 					         <thead>
 		                        <tr>
 		                          <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" aria-sort="ascending" aria-label="NAME: activate to sort column descending">ID</th>
 		                          <th scope="col">账号</th>
 		                          <th scope="col">VIP等级</th>
 		                          <th scope="col">等级过期时间</th>
-								  <th scope="col">ssr链接码</th>
+                                  <th scope="col">端口</th>
+								  <th scope="col">密码</th>
 								  <th scope="col">剩余流量</th>
                                   <th scope="col">总开支</th>
 								  <th scope="col">操作</th>
 		                        </tr>
-					         </thead>
-				              <tbo{if count($agents) == 0}
+					         </thead >
+				              <tbody>
+                                {if count($agents) == 0}
 		                        <tr>
 		                          <td colspan="7"><strong>暂时无客户记录</strong></td>
 		                        </tr>
@@ -82,7 +91,8 @@
 		                          <td>{$agent->email}</td>
 		                          <td>{$agent->class}</td>
 		                          <td>{$agent->class_expire}</td>
-								  <td>{$agent->ssrlink}</td>
+                                  <td><code>{$agent->port}</code></td>
+                                  <td><code>{$agent->passwd}</code></td>
 								  <td>{bcdiv($agent->transfer_enable - $agent->u - $agent->d, '1073741824', 0)}&nbsp;GB</td>
                                   <td>{number_format($agent_logs[$agent->id], 2)}元</td>
 		                          <td>
@@ -166,7 +176,35 @@
 				   </div>
 				  </div>
     <!-- END: Content-->
-
+                <!--pay all modal-->
+                   <div class="modal fade" id="user_all_modal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+                       <div class="modal-dialog modal-dialog-centered" role="document">
+                           <div class="modal-content">
+                               <div class="modal-header">
+                                   <h4 id="userModalLabel">用户信息确认</h4>
+                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                       <span aria-hidden="true">&times;</span>
+                                   </button>
+                               </div>
+                               <div class="modal-body">
+                                   <!-- Card body -->
+                                   <div class="card-body">
+                                       <p id="user_id" class="description">ID：</p>
+                                       <input type="hidden" id="user_all_id">
+                                       <select id="shop_id" class="form-control">
+                                           <option value="0"><a href="javascript:void(0)" onclick="return false;">选择您要开通的套餐</a></option>
+                                           {foreach $shop_name as $shop}
+                                               <option value="{$shop->id}">{$shop->name}--{$shop->price}</option>
+                                           {/foreach}
+                                       </select>
+                                   </div>
+                               </div>
+                               <div class="modal-footer">
+                                   <button id="user_all_input" type="button" class="btn btn-primary">确认提交</button>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
 				<!--pay modal-->
 				    <div class="modal fade" id="user_modal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
 					  <div class="modal-dialog modal-dialog-centered" role="document">
@@ -231,6 +269,70 @@
 			<script src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
 			<!--续费操作-->
 			<script>
+
+                $(function(){
+                    function initTableCheckbox() {
+                        var $thr = $('#test_table thead tr');
+                        var $checkAllTh = $('<th scope="col"><input type="checkbox" id="checkAll" name="checkAll" /></th>');
+                        /*将全选/反选复选框添加到表头最前，即增加一列*/
+                        $thr.prepend($checkAllTh);
+                        /*“全选/反选”复选框*/
+                        var $checkAll = $thr.find('input');
+                        $checkAll.click(function(event){
+                            /*将所有行的选中状态设成全选框的选中状态*/
+                            $tbr.find('input').prop('checked',$(this).prop('checked'));
+                            /*并调整所有选中行的CSS样式*/
+                            if ($(this).prop('checked')) {
+                                $tbr.find('input').parent().parent().addClass('warning');
+                            } else{
+                                $tbr.find('input').parent().parent().removeClass('warning');
+                            }
+                            /*阻止向上冒泡，以防再次触发点击操作*/
+                            event.stopPropagation();
+                        });
+                        /*点击全选框所在单元格时也触发全选框的点击操作*/
+                        $checkAllTh.click(function(){
+                            $(this).find('input').click();
+                        });
+                        var $tbr = $('#test_table tbody tr');
+                        var $checkItemTd = $('<td><input type="checkbox" name="checkItem" /></td>');
+                        /*每一行都在最前面插入一个选中复选框的单元格*/
+                        $tbr.prepend($checkItemTd);
+                        /*点击每一行的选中复选框时*/
+                        $tbr.find('input').click(function(event){
+                            /*调整选中行的CSS样式*/
+                            $(this).parent().parent().toggleClass('warning');
+                            /*如果已经被选中行的行数等于表格的数据行数，将全选框设为选中状态，否则设为未选中状态*/
+                            $checkAll.prop('checked',$tbr.find('input:checked').length == $tbr.length ? true : false);
+                            /*阻止向上冒泡，以防再次触发点击操作*/
+                            event.stopPropagation();
+                        });
+                        /*点击每一行时也触发该行的选中操作*/
+                        $tbr.click(function(){
+                            $(this).find('input').click();
+                        });
+                    }
+                    initTableCheckbox();
+                });
+
+                function buyAll() {
+                    let rows = document.getElementById("test_table").rows;
+                    let box = document.getElementsByName("checkItem");
+                    // let table = document.getElementById("test_table");
+                    let boxAll = new Array();
+                    let box_num = 0;
+                    for (let i = 0; i < box.length; i++) {
+                        if (box[i].checked) {
+                            let row = box[i].parentElement.parentElement.rowIndex;
+                            boxAll[box_num] = rows[row].cells[1].innerHTML;
+                            box_num++;
+                        }
+                    }
+                    $("#user_id").html("用户ID: " + boxAll.toString());
+                    $("#user_all_id").val(boxAll.toString());
+                    $("#user_all_modal").modal();
+                }
+
 				function del(delete_id,delete_email) {
 
 					$("#deleteid").html("用户ID: "+delete_id);
@@ -247,7 +349,38 @@
 					$("#user_modal").modal();
 				}
 
+				$("#user_all_input").click(function () {
+                    $('body').addClass('is-loading');
+                    $.ajax({
+                        type: "POST",
+                        url: "agentAllBuy",
+                        dataType: "json",
+                        data: {
+                            shopid: $("#shop_id").val(),
+                            userid: $("#user_all_id").val()
+                        },
+                        success: function (data) {
+                            $('body').removeClass('is-loading');
+                            if (data.ret) {
+                                swal.fire({
+                                    title: data.msg,
+                                    text: "赶快刷新下本页的客户记录查看吧~!",
+                                    type:"success"
+                                });
+                                window.setTimeout("location.href=window.location.href", 2000);
+                            } else {
+                                swal.fire('Oops...',data.msg,'error');
+                            }
+                        },
+                        error: function (jqXHR) {
+                            $('body').removeClass('is-loading');
+                            swal.fire('Oops...',jqXHR.status,'error');
+                        }
+                    });
+                });
+
 			$("#user_input").click(function () {
+                $('body').addClass('is-loading');
 					$.ajax({
 						type: "POST",
 						url: "agentbuy",
@@ -257,6 +390,7 @@
 							userid: userid
 						},
 						success: function (data) {
+                            $('body').removeClass('is-loading');
 							if (data.ret) {
 								swal.fire({
 			                       title: data.msg,
@@ -269,12 +403,14 @@
 							}
 						},
 						error: function (jqXHR) {
+                            $('body').removeClass('is-loading');
 							swal.fire('Oops...',jqXHR.status,'error');
 						}
 					});
 				});
 
 			    $("#delete_input").click(function () {
+                    $('body').addClass('is-loading');
 					$.ajax({
 						type: "DELETE",
 						url: "/user/agentdelete",
@@ -283,6 +419,7 @@
 							deleteid: deleteid
 						},
 						success: function (data) {
+                            $('body').removeClass('is-loading');
 							if (data.ret) {
 			                  $("#delete_modal").modal('hide');
 								swal.fire({
@@ -298,6 +435,7 @@
 							}
 						},
 						error: function (jqXHR) {
+                            $('body').removeClass('is-loading');
 							swal.fire('Oops...',jqXHR.status,'error');
 						}
 					});

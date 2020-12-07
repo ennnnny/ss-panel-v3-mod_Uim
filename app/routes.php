@@ -123,6 +123,7 @@ return function (SlimApp $app) {
 
         $this->get('/agent', App\Controllers\UserController::class . ':agent');//代理商入口
         $this->post('/agentbuy', App\Controllers\UserController::class . ':agentbuy');//代理商续费
+        $this->post('/agentAllBuy', App\Controllers\UserController::class . ':agentAllBuy');
         $this->post('/addUser', App\Controllers\UserController::class . ':addUser');//代理商添加用户
         $this->delete('/agentdelete', App\Controllers\UserController::class . ':addDelete');//代理商删除用户
         $this->get('/share-account',            App\Controllers\UserController::class . ':share_account');
