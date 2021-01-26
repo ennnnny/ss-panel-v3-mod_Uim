@@ -191,7 +191,7 @@
                                    <div class="card-body">
                                        <p id="user_id" class="description">ID：</p>
                                        <input type="hidden" id="user_all_id">
-                                       <select id="shop_id" class="form-control">
+                                       <select id="shop_all_id" class="form-control">
                                            <option value="0"><a href="javascript:void(0)" onclick="return false;">选择您要开通的套餐</a></option>
                                            {foreach $shop_name as $shop}
                                                <option value="{$shop->id}">{$shop->name}--{$shop->price}</option>
@@ -356,7 +356,7 @@
                         url: "agentAllBuy",
                         dataType: "json",
                         data: {
-                            shopid: $("#shop_id").val(),
+                            shopid: $("#shop_all_id").val(),
                             userid: $("#user_all_id").val()
                         },
                         success: function (data) {
